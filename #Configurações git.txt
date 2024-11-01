@@ -1,0 +1,40 @@
+#COMITA UM REPOSITORIO JA EXISTENTE
+cd /caminho/do/seu/projeto    # Navega para o diretório do projeto
+git status                     # Verifica o estado do repositório
+git add .                      # Adiciona todos os arquivos modificados
+git commit -m "Adiciona nova funcionalidade"  # Faz o commit com uma mensagem
+git push origin main           # Envia as mudanças para o repositório remoto
+
+
+#INICIAR UM REPOSITORIO DO ZERO
+mkdir nome_do_projeto                       # Cria um novo diretório
+cd nome_do_projeto                          # Navega para o diretório do projeto
+git init                                   # Inicializa um repositório Git
+git config --global user.name "Seu Nome"   # Configura o nome de usuário
+git config --global user.email "seuemail@exemplo.com" # Configura o e-mail
+echo "# Meu Projeto" > README.md            # Cria um arquivo README.md
+git status                                  # Verifica o estado do repositório
+git add .                                   # Adiciona todos os arquivos ao staging
+git commit -m "Commit inicial do projeto"   # Faz o commit inicial
+git remote add origin https://github.com/Dhx27/Automa-esDukar.git # Adiciona o remoto
+git push -u origin main                     # Envia o commit para o repositório remoto
+
+
+
+Como o módulo `distutils` foi removido no Python 3.12 e substituído pelo `setuptools`, a instalação direta do `distutils` não é mais recomendada. Em vez disso, você deve instalar o `setuptools`, que inclui as funcionalidades do `distutils`.
+
+### Passos para Instalar o `setuptools`
+
+1. **Instalar o `setuptools` via `pip`**:
+   No terminal ou prompt de comando, rode o seguinte comando:
+   ```bash
+   pip install setuptools
+   ```
+
+2. **Verificar a Instalação**:
+   Depois de instalar, você pode verificar se o `setuptools` está disponível:
+   ```bash
+   python -m setuptools --version
+   ```
+
+Se precisar de funcionalidades específicas do `distutils`, agora elas estão integradas ao `setuptools`, então o código pode ser adaptado para essa biblioteca.
