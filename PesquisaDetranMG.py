@@ -213,7 +213,31 @@ try:
                     
                     #Passa pelo erro do site
                     erroSite()
+                    
+                    #Verifica se o veículo não esta cadastrado na base Minas
+                    try:
                         
+                        campoVeiculoNaoCadastrado = navegador.find_element(By.CSS_SELECTOR, "div.alert.alert-danger.px-3.py-2.font-weight-bold.h5")
+                        valorVeiculoNaoCadastrado = campoVeiculoNaoCadastrado.text
+                        
+                        if (valorVeiculoNaoCadastrado == 'Veículo não Cadastrado na Base de Minas Gerais'):
+                            guia_relacao_veiculos[f'H{linhaResult}'] = "Veículo não Cadastrado na Base de Minas Gerais"  
+                            planilha.save(caminhoExcel)
+                            
+                            #Retorna para buscar o proximo veiculo
+                            campoConsultaOutroVeiculo = WebDriverWait(navegador, 15).until(
+                                EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.text-secondary[href*="/veiculos/situacao-do-veiculo/consultar-situacao-do-veiculo/"]'))
+                            ).click()
+                            
+                            #Coloca o status na planilha
+                            guia_relacao_veiculos[f'A{linhaResult}'] = "OK!"  # Inseri o status na planilha
+                            planilha.save(caminhoExcel)
+                                    
+                            return  # Retorna da função para continuar o loop principal
+
+                    except NoSuchElementException:
+                        
+                        print("Veículo cadastrado na base Minas")
                         
                     time.sleep(3)
                     
@@ -816,7 +840,11 @@ try:
                     campoConsultaOutroVeiculo = WebDriverWait(navegador, 15).until(
                         EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.text-secondary[href*="/veiculos/situacao-do-veiculo/consultar-situacao-do-veiculo/"]'))
                     ).click()
-
+                    
+                    #Coloca o status na planilha
+                    guia_relacao_veiculos[f'A{linhaResult}'] = "OK!"  # Inseri o status na planilha
+                    planilha.save(caminhoExcel)
+                    
                     
                 except Exception as e:
                     print(f"ERRO AO RESOLVER CAPTCHA {e}")
