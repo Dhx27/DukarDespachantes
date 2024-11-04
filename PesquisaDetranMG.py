@@ -14,7 +14,7 @@ import undetected_chromedriver as uc
 
 
 
-caminhoExcel = r'C:\Users\diogo.lana\Desktop\PYTHON\Projetos Dukar\teste.xlsx'
+caminhoExcel = r'C:\Users\diogo.lana\Desktop\TESTE\testes.xlsx'
 
 #Abri a planilha do Excel
 planilha = load_workbook(caminhoExcel)
@@ -186,14 +186,24 @@ try:
             
             #Inseri a placa no campo placa
             campoPlaca = navegador.find_element(By.CSS_SELECTOR, "#placa")
+            campoPlaca.clear()
             campoPlaca.send_keys(placa[index])
             
             #Inseri o chassi no campo chassi
             campoChassi = navegador.find_element(By.CSS_SELECTOR, "#chassi")
+            campoChassi.clear()
             campoChassi.send_keys(chassi[index])
             
             # Função principal
-            def resolver_recaptcha():
+            def resolver_recaptcha(tentativas = 0, max_Tentativas = 3):
+                
+                if tentativas >= max_Tentativas:
+                    print("Número maximo de tentativas atingido. Pesquisando próximo veículo")
+                    # Marca como "Erro ao resolver CAPTCHA" na planilha, e avança para o próximo
+                    guia_relacao_veiculos[f'A{linhaResult}'] = "Erro ao pesquisar"
+                    planilha.save(caminhoExcel)
+                    return  # Retorna para continuar o loop principal
+                
                 try:
                     print("Enviando requisição para resolver reCAPTCHA...")
                     captcha_id = enviar_requisicao_captcha(API_KEY, GOOGLE_KEY, PAGE_URL)
@@ -348,13 +358,13 @@ try:
                                 valorNumeroProcessamento = campoNumeroProcessamento.text
                                 
                                 # Converte os valores da coluna B em um conjunto para facilitar a busca
-                                colunaProcessamento = set(cell.value for cell in guia_resultado_autuacao['F'] if cell.value is not None)
+                                colunaAUTO = set(cell.value for cell in guia_resultado_autuacao['B'] if cell.value is not None)
 
                                 # Valor que você quer verificar
-                                valorProcessamento = valorNumeroProcessamento
+                                valorAITProcurar = valorNumeroAIT
 
                                 # Define `existe` como True se o valor estiver no conjunto, caso contrário, False
-                                existe = valorProcessamento in colunaProcessamento
+                                existe = valorAITProcurar in colunaAUTO
             
                                 if not existe:
                                     ultimaLinha1 = guia_resultado_autuacao.max_row + 1
@@ -466,13 +476,13 @@ try:
                                     valorNumeroProcessamento = campoNumeroProcessamento.text
                                     
                                     # Converte os valores da coluna B em um conjunto para facilitar a busca
-                                    colunaProcessamento = set(cell.value for cell in guia_resultado_autuacao['F'] if cell.value is not None)
+                                    colunaAUTO = set(cell.value for cell in guia_resultado_autuacao['B'] if cell.value is not None)
 
                                     # Valor que você quer verificar
-                                    valorProcessamento = valorNumeroProcessamento
+                                    valorAITProcurar = valorNumeroAIT
 
                                     # Define `existe` como True se o valor estiver no conjunto, caso contrário, False
-                                    existe = valorProcessamento in colunaProcessamento
+                                    existe = valorAITProcurar in colunaAUTO
             
                                     if not existe:
                                           
@@ -646,13 +656,13 @@ try:
                                 valorNumeroProcessamento = campoNumeroProcessamento.text
                                 
                                 # Converte os valores da coluna B em um conjunto para facilitar a busca
-                                colunaProcessamento = set(cell.value for cell in guia_resultado_autuacao['F'] if cell.value is not None)
+                                colunaAUTO = set(cell.value for cell in guia_resultado_multa['B'] if cell.value is not None)
 
                                 # Valor que você quer verificar
-                                valorProcessamento = valorNumeroProcessamento
+                                valorAITProcurar = valorNumeroAIT
 
                                 # Define `existe` como True se o valor estiver no conjunto, caso contrário, False
-                                existe = valorProcessamento in colunaProcessamento
+                                existe = valorAITProcurar in colunaAUTO
             
                                 if not existe:
                                         
@@ -769,14 +779,14 @@ try:
                                     valorMulta = campoValorMulta.text
                                         
                                     # Converte os valores da coluna B em um conjunto para facilitar a busca
-                                    colunaProcessamento = set(cell.value for cell in guia_resultado_autuacao['F'] if cell.value is not None)
+                                    colunaAUTO = set(cell.value for cell in guia_resultado_multa['B'] if cell.value is not None)
 
                                     # Valor que você quer verificar
-                                    valorProcessamento = valorNumeroProcessamento
+                                    valorAITProcurar = valorNumeroAIT
 
                                     # Define `existe` como True se o valor estiver no conjunto, caso contrário, False
-                                    existe = valorProcessamento in colunaProcessamento
-                
+                                    existe = valorAITProcurar in colunaAUTO
+                    
                                     if not existe:
                                         
                                         ultimaLinha4 = guia_resultado_multa.max_row + 1
@@ -847,8 +857,25 @@ try:
                     
                     
                 except Exception as e:
-                    print(f"ERRO AO RESOLVER CAPTCHA {e}")
+                    print(f"ERRO AO RESOLVER CAPTCHA")
                     
+                    print(f"Tentativa {tentativas + 1}/{max_Tentativas} falhou, tentando novamente em alguns segundos...")
+                    time.sleep(5)  # Espera 5 segundos antes de tentar novamente
+                    
+                    #Inseri a placa no campo placa
+                    campoPlaca = navegador.find_element(By.CSS_SELECTOR, "#placa")
+                    campoPlaca.clear()
+                    campoPlaca.send_keys(placa[index])
+                    
+                    #Inseri o chassi no campo chassi
+                    campoChassi = navegador.find_element(By.CSS_SELECTOR, "#chassi")
+                    campoChassi.clear()
+                    campoChassi.send_keys(chassi[index])
+
+                    # Chama a função novamente para tentar resolver o CAPTCHA, incrementando a contagem de tentativas
+
+                    resolver_recaptcha(tentativas + 1, max_Tentativas)
+                                
 
             # Executar
             resolver_recaptcha()
