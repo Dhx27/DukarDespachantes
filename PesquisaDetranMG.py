@@ -176,6 +176,12 @@ try:
     linhaResult = 1
         
     for index, row in enumerate(guia_relacao_veiculos.iter_rows(min_row=2, max_row=guia_relacao_veiculos.max_row), start=0):
+        
+        numerosMaxLinhas = guia_relacao_veiculos.max_row
+        if (index == numerosMaxLinhas -1 ):
+            print("Pesquisa de placas finalizadas")
+            break
+        
         linhaResult +=1
         status.append(row[0].value) #Obtem o status
         placa.append(row[1].value) #Obtem o valor da placa
@@ -604,7 +610,7 @@ try:
                                 erroSite()
                                 
                                 esperaMulta  = WebDriverWait(navegador, 10).until(
-                                    EC.visibility_of_element_located((By.CSS_SELECTOR, "#content > dl > dd:nth-child(2)"))
+                                    EC.visibility_of_element_located((By.CSS_SELECTOR, "#content dl:nth-child(1) > dd"))
                                 )
                                 
                                 #Obtem o orgão autuador
@@ -655,6 +661,10 @@ try:
                                 campoNumeroProcessamento = navegador.find_element(By.CSS_SELECTOR, "#content dl:nth-child(13) > dd")
                                 valorNumeroProcessamento = campoNumeroProcessamento.text
                                 
+                                #Obtem o valor da multa
+                                campoValorMulta = navegador.find_element(By.CSS_SELECTOR, "#content dl:nth-child(14) > dd")
+                                valorMulta = campoValorMulta.text
+                                    
                                 # Converte os valores da coluna B em um conjunto para facilitar a busca
                                 colunaAUTO = set(cell.value for cell in guia_resultado_multa['B'] if cell.value is not None)
 
@@ -670,19 +680,20 @@ try:
                                     
                                     # INSERINDO OS VALORES OBTIDOS DAS MULTAS NA PLANILHA
                                     guia_resultado_multa[f'A{ultimaLinha3}'] = placa[index]  # Inserindo o valor da placa
-                                    guia_resultado_multa[f'B{ultimaLinha3}'] = valorNumeroAIT  # Inserindo o número do AIT
-                                    guia_resultado_multa[f'C{ultimaLinha3}'] = valorDataMulta  # Inserindo o valor da data da multa
-                                    guia_resultado_multa[f'D{ultimaLinha3}'] = valorHoraMulta  # Inserindo a hora da multa
-                                    guia_resultado_multa[f'E{ultimaLinha3}'] = valorCodigoMulta  # Inserindo o valor do código da multa
-                                    guia_resultado_multa[f'F{ultimaLinha3}'] = valorNumeroProcessamento  # Inserindo o número de processamento
-                                    guia_resultado_multa[f'G{ultimaLinha3}'] = valorSituacao  # Inserindo o valor da situação
-                                    guia_resultado_multa[f'H{ultimaLinha3}'] = valorDescricaoMulta  # Inserindo o valor da descrição da multa
-                                    guia_resultado_multa[f'I{ultimaLinha3}'] = valorLocalMulta  # Inserindo o valor do local da multa
-                                    guia_resultado_multa[f'J{ultimaLinha3}'] = valorMunicipioMulta  # Inserindo o valor do município na multa
-                                    guia_resultado_multa[f'K{ultimaLinha3}'] = valorIncluidaMulta  # Inserindo o valor de quando a multa é incluída
-                                    guia_resultado_multa[f'L{ultimaLinha3}'] = valorDataLimiteDefesa  # Inserindo o valor da data limite da multa
-                                    guia_resultado_multa[f'M{ultimaLinha3}'] = valorOrgaoAutuador  # Inserindo o valor do órgão autuador
-                                    guia_resultado_multa[f'N{ultimaLinha3}'] = valorMulta  # Inserindo o valor da multa-
+                                    guia_resultado_multa[f'B{ultimaLinha3}'] = renavam[index]  # Inserindo o valor do renavam
+                                    guia_resultado_multa[f'C{ultimaLinha3}'] = valorNumeroAIT  # Inserindo o número do AIT
+                                    guia_resultado_multa[f'D{ultimaLinha3}'] = valorDataMulta  # Inserindo o valor da data da multa
+                                    guia_resultado_multa[f'E{ultimaLinha3}'] = valorHoraMulta  # Inserindo a hora da multa
+                                    guia_resultado_multa[f'F{ultimaLinha3}'] = valorCodigoMulta  # Inserindo o valor do código da multa
+                                    guia_resultado_multa[f'G{ultimaLinha3}'] = valorNumeroProcessamento  # Inserindo o número de processamento
+                                    guia_resultado_multa[f'H{ultimaLinha3}'] = valorSituacao  # Inserindo o valor da situação
+                                    guia_resultado_multa[f'I{ultimaLinha3}'] = valorDescricaoMulta  # Inserindo o valor da descrição da multa
+                                    guia_resultado_multa[f'J{ultimaLinha3}'] = valorLocalMulta  # Inserindo o valor do local da multa
+                                    guia_resultado_multa[f'K{ultimaLinha3}'] = valorMunicipioMulta  # Inserindo o valor do município na multa
+                                    guia_resultado_multa[f'L{ultimaLinha3}'] = valorIncluidaMulta  # Inserindo o valor de quando a multa é incluída
+                                    guia_resultado_multa[f'M{ultimaLinha3}'] = valorDataLimiteDefesa  # Inserindo o valor da data limite da multa
+                                    guia_resultado_multa[f'N{ultimaLinha3}'] = valorOrgaoAutuador  # Inserindo o valor do órgão autuador
+                                    guia_resultado_multa[f'O{ultimaLinha3}'] = valorMulta  # Inserindo o valor da multa-
                                     
                                     #Salva os resultados na planilha
                                     planilha.save(caminhoExcel)
@@ -793,19 +804,20 @@ try:
                                         
                                         # INSERINDO OS VALORES OBTIDOS DAS MULTAS NA PLANILHA
                                         guia_resultado_multa[f'A{ultimaLinha4}'] = placa[index]  # Inserindo o valor da placa
-                                        guia_resultado_multa[f'B{ultimaLinha4}'] = valorNumeroAIT  # Inserindo o número do AIT
-                                        guia_resultado_multa[f'C{ultimaLinha4}'] = valorDataMulta  # Inserindo o valor da data da multa
-                                        guia_resultado_multa[f'D{ultimaLinha4}'] = valorHoraMulta  # Inserindo a hora da multa
-                                        guia_resultado_multa[f'E{ultimaLinha4}'] = valorCodigoMulta  # Inserindo o valor do código da multa
-                                        guia_resultado_multa[f'F{ultimaLinha4}'] = valorNumeroProcessamento  # Inserindo o número de processamento
-                                        guia_resultado_multa[f'G{ultimaLinha4}'] = valorSituacao  # Inserindo o valor da situação
-                                        guia_resultado_multa[f'H{ultimaLinha4}'] = valorDescricaoMulta  # Inserindo o valor da descrição da multa
-                                        guia_resultado_multa[f'I{ultimaLinha4}'] = valorLocalMulta  # Inserindo o valor do local da multa
-                                        guia_resultado_multa[f'J{ultimaLinha4}'] = valorMunicipioMulta  # Inserindo o valor do município na multa
-                                        guia_resultado_multa[f'K{ultimaLinha4}'] = valorIncluidaMulta  # Inserindo o valor de quando a multa é incluída
-                                        guia_resultado_multa[f'L{ultimaLinha4}'] = valorDataLimiteDefesa  # Inserindo o valor da data limite da multa
-                                        guia_resultado_multa[f'M{ultimaLinha4}'] = valorOrgaoAutuador  # Inserindo o valor do órgão autuador
-                                        guia_resultado_multa[f'N{ultimaLinha4}'] = valorMulta  # Inserindo o valor da multa
+                                        guia_resultado_multa[f'B{ultimaLinha4}'] = renavam[index]  # Inserindo o valor do renavam
+                                        guia_resultado_multa[f'C{ultimaLinha4}'] = valorNumeroAIT  # Inserindo o número do AIT
+                                        guia_resultado_multa[f'D{ultimaLinha4}'] = valorDataMulta  # Inserindo o valor da data da multa
+                                        guia_resultado_multa[f'E{ultimaLinha4}'] = valorHoraMulta  # Inserindo a hora da multa
+                                        guia_resultado_multa[f'F{ultimaLinha4}'] = valorCodigoMulta  # Inserindo o valor do código da multa
+                                        guia_resultado_multa[f'G{ultimaLinha4}'] = valorNumeroProcessamento  # Inserindo o número de processamento
+                                        guia_resultado_multa[f'H{ultimaLinha4}'] = valorSituacao  # Inserindo o valor da situação
+                                        guia_resultado_multa[f'I{ultimaLinha4}'] = valorDescricaoMulta  # Inserindo o valor da descrição da multa
+                                        guia_resultado_multa[f'J{ultimaLinha4}'] = valorLocalMulta  # Inserindo o valor do local da multa
+                                        guia_resultado_multa[f'K{ultimaLinha4}'] = valorMunicipioMulta  # Inserindo o valor do município na multa
+                                        guia_resultado_multa[f'L{ultimaLinha4}'] = valorIncluidaMulta  # Inserindo o valor de quando a multa é incluída
+                                        guia_resultado_multa[f'M{ultimaLinha4}'] = valorDataLimiteDefesa  # Inserindo o valor da data limite da multa
+                                        guia_resultado_multa[f'N{ultimaLinha4}'] = valorOrgaoAutuador  # Inserindo o valor do órgão autuador
+                                        guia_resultado_multa[f'O{ultimaLinha4}'] = valorMulta  # Inserindo o valor da multa
                                     
                                         #Salva os resultados na planilha
                                         planilha.save(caminhoExcel)
@@ -879,8 +891,64 @@ try:
 
             # Executar
             resolver_recaptcha()
+            
+            time.sleep(2)
                 
 except TimeoutException:
-    print("ERRO")
+    print("Reinicie o robô")
+
+#=======================================================================================================================
+
+#                                           EMITINDO OS BOLETOS
+
+
+#Navega para a pagina de emissão de multas    
+navegador.get("https://www.transito.mg.gov.br/veiculos/situacao-do-veiculo/emitir-de-extrato-de-multas")
+
+#Espera que o campo placa esteja na tela 
+
+PaginaEmissaoMultas = WebDriverWait(navegador, 1000).until(
+    EC.visibility_of_element_located((By.XPATH, '//*[@id="content"]'))
+)
+
+try:
+    
+    placaEmissao = []
+    renavamEmissao = []
+    statusEmissao = []
+    codigoProcessamentoEmissao = []
+    
+    for index, row in enumerate(guia_resultado_multa.iter_rows(min_row=2, max_row=guia_relacao_veiculos.max_row), start=0):
+        
+        statusEmissao.append(row[16].value) #Obtem o status
+        placaEmissao.append(row[0].value) #Obtem o valor da placa
+        renavamEmissao.append(row[1].value) #Obtem renavam
+        codigoProcessamentoEmissao.append(row[6].value) #Obtem o codigo de processamento da multa
+        
+        if statusEmissao[index] is None:
+            
+            #Inseri a placa
+            campoPlacaEmissão = navegador.find_element(By.CSS_SELECTOR, "#placa")
+            campoPlacaEmissão.send_keys(placaEmissao[index])
+            
+            #Inseri o renavam
+            campoRenavamEmissao = navegador.find_element(By.CSS_SELECTOR, "#renavam")
+            campoRenavamEmissao.send_keys(renavamEmissao[index])
+            
+            #Clica no botão pesquisar
+            botaoPEsquisarMUltas = navegador.find_element(By.CSS_SELECTOR, "#content > form > button")
+            botaoPEsquisarMUltas.click()
+            
+            #Espera o elemento de onde baixamos os boletos
+            elementoPlaca = WebDriverWait(navegador, 30).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "placa placa-particular"))
+            )
+            
+            
+
+except: 
+    
+    print("Renicie a automação")
     
 navegador.quit()
+
