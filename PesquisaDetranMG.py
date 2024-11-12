@@ -11,7 +11,10 @@ from selenium.webdriver.common.keys import Keys  # Para acessar as teclas especi
 from selenium.webdriver.common.action_chains import ActionChains
 import pyautogui
 import undetected_chromedriver as uc
+import requests
+import os
 
+pathSaida = r'C:\Users\diogo.lana\Desktop\TESTE\FIM'
 
 caminhoExcel = r'C:\Users\diogo.lana\Desktop\TESTE\testes.xlsx'
 
@@ -929,6 +932,7 @@ try:
     renavamEmissao = []
     statusEmissao = []
     codigoProcessamentoEmissao = []
+    nomeAIT = []
     
     for index, row in enumerate(guia_resultado_multa.iter_rows(min_row=2, max_row=guia_resultado_multa.max_row), start=0):
         
@@ -936,6 +940,8 @@ try:
         placaEmissao.append(row[0].value) #Obtem o valor da placa
         renavamEmissao.append(row[1].value) #Obtem renavam
         codigoProcessamentoEmissao.append(row[6].value) #Obtem o codigo de processamento da multa
+        nomeAIT.append(row[2].value)
+        
         
         if statusEmissao[index] is None:
             
@@ -975,6 +981,8 @@ try:
                 cliqueEmitirMulta = navegador.find_element(By.CSS_SELECTOR, selectorMultas)
                 cliqueEmitirMulta.click()
                 
+                erroSite()
+                
                 esperaInfracoes = WebDriverWait(navegador, 10).until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, "#content > h2:nth-child(5)"))
                 )
@@ -996,18 +1004,26 @@ try:
                         botaoImpressao = navegador.find_element(By.CSS_SELECTOR, selectorImpressaoMulta)
                         botaoImpressao.click()
                         
+                        erroSite()
+                        
                         try:
+                        
+                            time.sleep(5)
                             
-                            campoBoleto = WebDriverWait(navegador, 10).until(
-                                EC.visibility_of_element_located((By.CSS_SELECTOR, "#viewer"))
-                            )
+                            erroSite()
+                            
+                            pyautogui.hotkey('ctrl', 's')
                             
                             time.sleep(2)
                             
-                            botao_imprimir = navegador.find_element(By.CSS_SELECTOR, "#downloads #print")
-                            # Rola para o botão de impressão
-                            actions.move_to_element(botao_imprimir).perform()
-                            botao_imprimir.click()
+                            pyautogui.write(pathSaida, nomeAIT)
+                            
+                            time.sleep(2)
+                            
+                            pyautogui.hotkey('enter')
+
+                            
+                            
                         except:
                             print("Erro ao imprimir multa")
                     
