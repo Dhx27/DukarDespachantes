@@ -934,6 +934,7 @@ try:
     codigoProcessamentoEmissao = []
     nomeAIT = []
     
+    emissaoCont = 1
     for index, row in enumerate(guia_resultado_multa.iter_rows(min_row=2, max_row=guia_resultado_multa.max_row), start=0):
         
         statusEmissao.append(row[16].value) #Obtem o status
@@ -942,6 +943,7 @@ try:
         codigoProcessamentoEmissao.append(row[6].value) #Obtem o codigo de processamento da multa
         nomeAIT.append(row[2].value)
         
+        emissaoCont += 1
         
         if statusEmissao[index] is None:
             
@@ -1008,35 +1010,31 @@ try:
                         
                         try:
                         
-                            time.sleep(5)
+                            time.sleep(2)
                             
                             erroSite()
                             
                             pyautogui.hotkey('ctrl', 's')
                             
                             time.sleep(2)
-                            
-                            pyautogui.write(pathSaida, nomeAIT)
+
+                            caminho_arquivo = os.path.join(pathSaida, nomeAIT[index])
+                            pyautogui.write(caminho_arquivo)
                             
                             time.sleep(2)
                             
                             pyautogui.hotkey('enter')
-
                             
+                            #Coloca o status na planilha
+                            guia_resultado_multa[f'Q{emissaoCont}'] = "OK!"  # Inseri o status na planilha
+                            planilha.save(caminhoExcel)
                             
                         except:
                             print("Erro ao imprimir multa")
                     
+                
                 botaoVolta = navegador.find_element(By.XPATH, '//*[@id="content"]/div[3]/a')
                     
-                
-                    
-                
-                    
-                
-                
-                
-
 except: 
     
     print("Renicie a automação" )
