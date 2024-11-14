@@ -90,9 +90,14 @@ def erroSite():
             EC.visibility_of_element_located((By.CSS_SELECTOR, "body > main > div > div.card > div > div > div > div > h2"))
         )
         navegador.refresh()
-                                    
+        
+        pyautogui.hotkey('f5')   
+                          
         time.sleep(1)
+        
         pyautogui.hotkey('enter')
+        
+        time.sleep(10)
                                     
     except TimeoutException:
         print("Prosseguir cadastro")
@@ -926,118 +931,130 @@ PaginaEmissaoMultas = WebDriverWait(navegador, 1000).until(
     EC.visibility_of_element_located((By.XPATH, '//*[@id="content"]'))
 )
 
-try:
     
-    placaEmissao = []
-    renavamEmissao = []
-    statusEmissao = []
-    codigoProcessamentoEmissao = []
-    nomeAIT = []
+placaEmissao = []
+renavamEmissao = []
+statusEmissao = []
+codigoProcessamentoEmissao = []
+nomeAIT = []
+
+ultimaLinha = 1
+
+for index, row in enumerate(guia_resultado_multa.iter_rows(min_row=2, max_row=guia_resultado_multa.max_row), start=0):
+        
+    statusEmissao.append(row[16].value) #Obtem o status
+    placaEmissao.append(row[0].value) #Obtem o valor da placa
+    renavamEmissao.append(row[1].value) #Obtem renavam
+    codigoProcessamentoEmissao.append(row[6].value) #Obtem o codigo de processamento da multa
+    nomeAIT.append(row[2].value)
     
-    emissaoCont = 1
-    for index, row in enumerate(guia_resultado_multa.iter_rows(min_row=2, max_row=guia_resultado_multa.max_row), start=0):
+    ultimaLinha += 1
         
-        statusEmissao.append(row[16].value) #Obtem o status
-        placaEmissao.append(row[0].value) #Obtem o valor da placa
-        renavamEmissao.append(row[1].value) #Obtem renavam
-        codigoProcessamentoEmissao.append(row[6].value) #Obtem o codigo de processamento da multa
-        nomeAIT.append(row[2].value)
-        
-        emissaoCont += 1
-        
-        if statusEmissao[index] is None:
+    if statusEmissao[index] is None:
             
-            #Inseri a placa
-            campoPlacaEmissão = navegador.find_element(By.CSS_SELECTOR, "#placa")
-            campoPlacaEmissão.send_keys(placaEmissao[index])
+        #Inseri a placa
+        campoPlacaEmissão = navegador.find_element(By.CSS_SELECTOR, "#placa")
+        campoPlacaEmissão.send_keys(placaEmissao[index])
             
-            #Inseri o renavam
-            campoRenavamEmissao = navegador.find_element(By.CSS_SELECTOR, "#renavam")
-            campoRenavamEmissao.send_keys(renavamEmissao[index])
+        #Inseri o renavam
+        campoRenavamEmissao = navegador.find_element(By.CSS_SELECTOR, "#renavam")
+        campoRenavamEmissao.send_keys(renavamEmissao[index])
             
-            #Clica no botão pesquisar
-            botaoPEsquisarMUltas = navegador.find_element(By.CSS_SELECTOR, "#content > form > button")
-            botaoPEsquisarMUltas.click()
+        #Clica no botão pesquisar
+        botaoPEsquisarMUltas = navegador.find_element(By.CSS_SELECTOR, "#content > form > button")
+        botaoPEsquisarMUltas.click()
             
-            erroSite()
+        erroSite()
 
             #Espera o elemento de onde baixamos os boletos
+        elementoPlaca = WebDriverWait(navegador, 30).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "#content > div.row.justify-content-center.mb-3.mt-3 > div"))
+        )
+            
+            
+        # Localizando a tabela pela classe
+        tabelaEmissao = navegador.find_element(By.CSS_SELECTOR, "#content > table")
+                        
+        # Contando o número de linhas (tr)
+        linhasEmissao = tabelaEmissao.find_elements(By.TAG_NAME, "tr")
+        numero_linhasEmissao = len(linhasEmissao)
+            
+            
+        #Começa a verificar em cada uma das linha de autuação, vencidas e a vencer
+        for cont in range(1, numero_linhasEmissao):
+                
+            selectorMultas = f"#content > table > tbody > tr:nth-child({cont}) > td:nth-child(1) > a"
+            cliqueEmitirMulta = navegador.find_element(By.CSS_SELECTOR, selectorMultas)
+            cliqueEmitirMulta.click()
+                
+            erroSite()
+                
+            esperaInfracoes = WebDriverWait(navegador, 10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "#content > h2:nth-child(5)"))
+            )
+                
+            tabelaProcessos = navegador.find_element(By.CSS_SELECTOR, "#content > table")
+            linhaTabelaProcessos = tabelaProcessos.find_elements(By.TAG_NAME, "tr")
+            numero_LinhasTabProcessos = len(linhaTabelaProcessos)
+
+                
+            for cont in range(1, numero_LinhasTabProcessos):
+                    
+                selectorProcesso = f"#content > table > tbody > tr:nth-child({cont}) > td:nth-child(2)"
+                campoProcesso = navegador.find_element(By.CSS_SELECTOR, selectorProcesso)
+                valorProcesso = campoProcesso.text
+                
+                time.sleep(1)
+                    
+                if codigoProcessamentoEmissao[index] in valorProcesso:
+                        
+                    selectorImpressaoMulta = f"#content > table > tbody > tr:nth-child({cont}) > td:nth-child(6) > a > img"
+                    botaoImpressao = navegador.find_element(By.CSS_SELECTOR, selectorImpressaoMulta)
+                    botaoImpressao.click()
+                    erroSite()
+                        
+                    try:
+                            
+                        erroSite()
+                            
+                        pyautogui.hotkey('ctrl', 's')
+                            
+                        time.sleep(1)
+
+                        caminho_arquivo = os.path.join(pathSaida, nomeAIT[index])
+                        pyautogui.write(caminho_arquivo)
+                            
+                        time.sleep(2)
+                            
+                        pyautogui.hotkey('enter')
+                            
+                        #Coloca o status na planilha
+                        guia_resultado_multa[f'Q{ultimaLinha}'] = "OK!"  # Inseri o status na planilha
+                        planilha.save(caminhoExcel)
+
+                            
+                        pyautogui.hotkey('ctrl', 'w')
+                            
+                    except:
+                        print("Erro ao imprimir multa")
+        
+                
+            botaoVolta = navegador.find_element(By.XPATH, "//a[text()='Retornar à lista de tipos de infrações']")
+            botaoVolta.click()
+            
+            erroSite()
+            
+                #Espera o elemento de onde baixamos os boletos
             elementoPlaca = WebDriverWait(navegador, 30).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "#content > div.row.justify-content-center.mb-3.mt-3 > div"))
             )
-            
-            
-             # Localizando a tabela pela classe
-            tabelaEmissao = navegador.find_element(By.CSS_SELECTOR, "#content > table")
-                        
-            # Contando o número de linhas (tr)
-            linhasEmissao = tabelaEmissao.find_elements(By.TAG_NAME, "tr")
-            numero_linhasEmissao = len(linhasEmissao)
-            
-            
-            #Começa a verificar em cada uma das linha de autuação, vencidas e a vencer
-            for cont in range(2, numero_linhasEmissao):
-                
-                
-                selectorMultas = f"#content > table > tbody > tr:nth-child({cont}) > td:nth-child(1) > a"
-                cliqueEmitirMulta = navegador.find_element(By.CSS_SELECTOR, selectorMultas)
-                cliqueEmitirMulta.click()
-                
-                erroSite()
-                
-                esperaInfracoes = WebDriverWait(navegador, 10).until(
-                    EC.visibility_of_element_located((By.CSS_SELECTOR, "#content > h2:nth-child(5)"))
-                )
-                
-                tabelaProcessos = navegador.find_element(By.CSS_SELECTOR, "#content > table")
-                linhaTabelaProcessos = tabelaProcessos.find_elements(By.TAG_NAME, "tr")
-                numero_LinhasTabProcessos = len(linhaTabelaProcessos)
-
-                
-                for cont in range(1, numero_LinhasTabProcessos):
-                    
-                    selectorProcesso = f"#content > table > tbody > tr:nth-child({cont}) > td:nth-child(2)"
-                    campoProcesso = navegador.find_element(By.CSS_SELECTOR, selectorProcesso)
-                    valorProcesso = campoProcesso.text
-                    
-                    if codigoProcessamentoEmissao[index] in valorProcesso:
-                        
-                        selectorImpressaoMulta = f"#content > table > tbody > tr:nth-child({cont}) > td:nth-child(6) > a > img"
-                        botaoImpressao = navegador.find_element(By.CSS_SELECTOR, selectorImpressaoMulta)
-                        botaoImpressao.click()
-                        
-                        erroSite()
-                        
-                        try:
-                        
-                            time.sleep(2)
-                            
-                            erroSite()
-                            
-                            pyautogui.hotkey('ctrl', 's')
-                            
-                            time.sleep(2)
-
-                            caminho_arquivo = os.path.join(pathSaida, nomeAIT[index])
-                            pyautogui.write(caminho_arquivo)
-                            
-                            time.sleep(2)
-                            
-                            pyautogui.hotkey('enter')
-                            
-                            #Coloca o status na planilha
-                            guia_resultado_multa[f'Q{emissaoCont}'] = "OK!"  # Inseri o status na planilha
-                            planilha.save(caminhoExcel)
-                            
-                        except:
-                            print("Erro ao imprimir multa")
-                    
-                
-                botaoVolta = navegador.find_element(By.XPATH, '//*[@id="content"]/div[3]/a')
-                    
-except: 
+    try:
+        
+        consultarOutroVeiculo = navegador.find_element(By.XPATH, '//*[@id="content"]/div[3]/a')    
+        consultarOutroVeiculo.click()
     
-    print("Renicie a automação" )
-    
+    except NoSuchElementException:
+        print("Proxima linha")
+                    
 navegador.quit()
 
