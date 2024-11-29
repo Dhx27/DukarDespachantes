@@ -20,7 +20,7 @@ pathDownloads = r'C:\Users\diogo.lana\Desktop\TESTE'
 
 #o REGION fuciona como uma rotina do ibm
 # Configuração da chave da API do 2Captcha
-api_key = os.getenv('API_KEY_2CAPTCHA', '657c1d808a967e254d096cd0cfd696c3')
+api_key = os.getenv('API_KEY_2CAPTCHA', 'CHAVE')
 solver = TwoCaptcha(api_key)
 
 # Inicializa o navegador usando o WebDriver Manager
