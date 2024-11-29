@@ -42,7 +42,7 @@ actions = ActionChains(navegador)
 
 
 # Sua chave API do 2Captcha
-API_KEY = '657c1d808a967e254d096cd0cfd696c3'
+API_KEY = 'CHAVE'
 
 # data-sitekey do reCAPTCHA (obtido ao inspecionar a página)
 GOOGLE_KEY = '6LfVpnIUAAAAAHkISk6Z6juZcsUx6hbyJGwfnfPL'
