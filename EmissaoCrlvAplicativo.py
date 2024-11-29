@@ -35,7 +35,7 @@ def executar_automacao():
         messagebox.showerror("Erro", "Por favor selecione ambos os caminhos.")
         return
 
-    api_key = os.getenv('API_KEY_2CAPTCHA', '657c1d808a967e254d096cd0cfd696c3')  # Use sua própria chave API
+    api_key = os.getenv('API_KEY_2CAPTCHA', 'CHAVE')  # Use sua própria chave API
     solver = TwoCaptcha(api_key)
 
     service = Service(ChromeDriverManager().install())  # Cria o serviço do ChromeDriver
