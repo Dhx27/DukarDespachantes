@@ -19,14 +19,14 @@ def adicionar_ao_excel(resultados, caminho_excel):
 
     # Adiciona os resultados
     for resultado in resultados:
-        instanciaExcel.append([resultado['boleto'], resultado['valor'], resultado['data_vencimento'], resultado['nome_beneficiario'], resultado['ait']])
+        instanciaExcel.append([resultado['boleto'], resultado['nome_beneficiario'], resultado['data_vencimento'], resultado['valor'], resultado['ait']])
 
     # Salva o arquivo Excel
     excel.save(caminho_excel)
     print(f"Dados salvos em {caminho_excel}")
 
 
-caminho_pdf = r"M:\TI\ROBOS\ROBOS_EM_DEV\Automação Python\Boleto Py\Boletos\PDFsam_merge.pdf"
+caminho_pdf = r"C:\Users\stefany\Desktop\diogo\PDFsam_merge.pdf"
 texto_lista = []
 resultados = []  # Lista para armazenar os resultados
 
@@ -292,13 +292,18 @@ for cont in range(len(texto_lista)):
         
         print(texto_lista[cont])
         
+        corteOrgao1 =  re.split("Órgão Competente: ", texto_lista[cont])
+        corteOrgao2 = re.split("Código do Órgão Autuador:", corteOrgao1[1])
+        nomeBeneficiario = corteOrgao2[0].replace("\n", "")
+        
         corteAutoSENATRAN1 = re.split("Auto de Infração: ", texto_lista[cont])
         corteAutoSENATRAN2 = re.split(" Valor:", corteAutoSENATRAN1[1])
         AutoSenatran = corteAutoSENATRAN2[0]
-        boleto, valor, dataVenc = encontrar_boletos(texto_lista[cont])
         
-        nomeBeneficiario = "SENATRAN SNE"
+        boleto, valor, dataVenc = encontrar_boletos(texto_lista[cont])
 
+        boleto = boleto.replace(".", "")
+        
         # Armazenando os resultados de cada extração
         resultados.append({
             'boleto': boleto,
@@ -313,7 +318,7 @@ for cont in range(len(texto_lista)):
 for resultado in resultados:
     print(resultado)
     
-caminho_excel = r'C:\Users\stefany\Desktop\diogo\TESTE.xlsx'
+caminho_excel = r'C:\Users\stefany\Desktop\diogo\TESTE1.xlsx'
 
 # Adicionar os dados ao Excel
 adicionar_ao_excel(resultados, caminho_excel)
