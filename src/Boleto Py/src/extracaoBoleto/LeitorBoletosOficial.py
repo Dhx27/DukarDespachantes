@@ -3,6 +3,10 @@ import re
 import os
 from datetime import datetime, timedelta
 from openpyxl import Workbook
+from decimal import Decimal, ROUND_HALF_UP
+
+
+codCliente = input("Insira o codigo do cliente: ")
 
 # Função para adicionar valores ao Excel
 def adicionar_ao_excel(resultados, caminho_excel):
@@ -12,21 +16,31 @@ def adicionar_ao_excel(resultados, caminho_excel):
 
     # Cabeçalhos
     instanciaExcel['A1'] = 'Codigo de Barras'
-    instanciaExcel['B1'] = 'Orgao autuador'
+    instanciaExcel['B1'] = 'Orgao Autuador'
     instanciaExcel['C1'] = 'Data Vencimento'
-    instanciaExcel['D1'] = 'Valor'
-    instanciaExcel['E1'] = 'AIT'
+    instanciaExcel['D1'] = 'Valor a Pagar'
+    instanciaExcel['E1'] = 'Valor Desconto'
+    instanciaExcel['F1'] = 'AIT'  # Corrigido para F1
+    instanciaExcel['G1'] = 'Codigo Cliente'
 
     # Adiciona os resultados
     for resultado in resultados:
-        instanciaExcel.append([resultado['boleto'], resultado['valor'], resultado['data_vencimento'], resultado['nome_beneficiario'], resultado['ait']])
+        instanciaExcel.append([
+            resultado['boleto'],
+            resultado['nome_beneficiario'],
+            resultado['data_vencimento'],
+            resultado['valor'],
+            resultado['desconto'],
+            resultado['ait'],
+            resultado['codigo']
+        ])
 
     # Salva o arquivo Excel
     excel.save(caminho_excel)
     print(f"Dados salvos em {caminho_excel}")
 
 
-caminho_pdf = r"M:\TI\ROBOS\ROBOS_EM_DEV\Automação Python\Boleto Py\Boletos\PDFsam_merge.pdf"
+caminho_pdf = r"M:\TI\ROBOS\ROBOS_EM_DEV\Automação Python\Boleto Py\data\boletosConcatenados\PDFsam_merge.pdf"
 texto_lista = []
 resultados = []  # Lista para armazenar os resultados
 
@@ -127,10 +141,15 @@ for cont in range(len(texto_lista)):
 
 
     if "Estado do Espírito Santo - Departamento Estadual De Transito" in texto_lista[cont]:
-        
+
         corteValorES1 = re.split("Pagar até:", texto_lista[cont])
         corteValorES2 = re.split(r"R\$", corteValorES1[0])
         valorMultaES = corteValorES2[1].replace("\n", "").strip()
+
+        corteDescontoES1 = re.split("Multa UF:", texto_lista[cont])
+        corteDescontoES2 = re.split("Total a Pagar", corteDescontoES1[1])
+        corteDescontoES3 = re.split(" ", corteDescontoES2[0])
+        valorDescontoES = corteDescontoES3[5]
 
         regexBoletoES = r"\d{11}-\d"
         valorBoletoESLista = re.findall(regexBoletoES, texto_lista[cont])
@@ -156,13 +175,16 @@ for cont in range(len(texto_lista)):
         resultados.append({
             'boleto': codigoBarrasES,
             'valor': valorMultaES,
+            'desconto' : valorDescontoES,
             'data_vencimento': dataVencimentoES,
             'nome_beneficiario': nomeBeneficiario,
-            'ait': autoES
+            'ait': autoES,
+            'codigo': codCliente
             })
 
     elif "DNIT" in texto_lista[cont]:
-        
+    
+
         corteDataVencimentoDNIT1 = re.split(
             "PAGÁVEL EM QUALQUER BANCO ATÉ O VENCIMENTO", texto_lista[cont])
         corteDataVencimentoDNIT2 = re.split(
@@ -173,6 +195,10 @@ for cont in range(len(texto_lista)):
             "conforme Artigo 30 da Resolução Nº 619/16 do CONTRAN.", texto_lista[cont])
         corteValorDNIT2 = re.split("3. Até", corteValorDNIT1[1])
         valorDNIT = corteValorDNIT2[0].strip()
+
+        corteDescontoDNIT1 = re.split("Desconto/Abatimento", texto_lista[cont])
+        corteDescontoDNIT2 = re.split("1.", corteDescontoDNIT1[1].replace('\n', ''))
+        valorDescontoDNIT = corteDescontoDNIT2[0]
 
         corteDNITCodigo1 = re.split("Recibo do Pagador", texto_lista[cont])
         corteDNITCodigo2 = re.split("Nosso-Número", corteDNITCodigo1[1])
@@ -190,9 +216,11 @@ for cont in range(len(texto_lista)):
         resultados.append({
             'boleto': codigoBarrasDNIT,
             'valor': valorDNIT,
+            'desconto' : valorDescontoDNIT,
             'data_vencimento': dataVencimentoDNIT,
             'nome_beneficiario': nomeBeneficiario,
-            'ait': AutoDNIT
+            'ait': AutoDNIT,
+            'codigo': codCliente
             
         })
 
@@ -221,6 +249,7 @@ for cont in range(len(texto_lista)):
         
         nomeBeneficiario = "DETRAN - MG"
 
+        '''
         # Armazenando os resultados de cada extração
         resultados.append({
             'boleto': codigoBarrasDetranMG,
@@ -229,16 +258,20 @@ for cont in range(len(texto_lista)):
             'nome_beneficiario': nomeBeneficiario,
             'ait': AutoDetranMG
         })
+        '''
 
     elif "POLÍCIA RODOVIÁRIA FEDERAL - PRF" in texto_lista[cont]:
         
-
         corteValorPRF1 = re.split("Valor Cobrado:", texto_lista[cont])
         corteValorPRF2 = re.split(
             "Instruções para pagamento:", corteValorPRF1[1])
         regexValorPRF = r'R\$[\s]*[\d,.]+'
         valorPRFLista = re.findall(regexValorPRF, corteValorPRF2[1])
         valorPRF = str(valorPRFLista[0]).replace("R$", "").strip()
+
+        corteDescontoPRF1 = re.split("Descontos/Abatimento :", texto_lista[cont])
+        corteDescontoPRF2 = re.split("\n", corteDescontoPRF1[1])
+        descontoPRF = corteDescontoPRF2[0].replace('R$ ', '')
 
         cortePRFCodigo1 = re.split("PAGAMENTO EM CHEQUE", texto_lista[cont])
         cortePRFCodigo2 = re.split("Vencimento", cortePRFCodigo1[1])
@@ -262,9 +295,11 @@ for cont in range(len(texto_lista)):
         resultados.append({
             'boleto': codigoBarrasPRF,
             'valor': valorPRF,
+            'desconto': descontoPRF,
             'data_vencimento': dataVencimentoPRF,
             'nome_beneficiario': nomeBeneficiario,
-            'ait': AutoPRF
+            'ait': AutoPRF,
+            'codigo': codCliente
         })
 
     elif "ESTADODOPARANÁ" in texto_lista[cont]:
@@ -283,9 +318,11 @@ for cont in range(len(texto_lista)):
         resultados.append({
             'boleto': boleto,
             'valor': valor,
+            'desconto': "0,00",
             'data_vencimento': dataVenc,
             'nome_beneficiario': nomeBeneficiario,
-            'ait': AutoPARANA
+            'ait': AutoPARANA,
+            'codigo': codCliente
         })
         
     elif "SENATRAN SNE" in texto_lista[cont]:
@@ -295,25 +332,46 @@ for cont in range(len(texto_lista)):
         corteAutoSENATRAN1 = re.split("Auto de Infração: ", texto_lista[cont])
         corteAutoSENATRAN2 = re.split(" Valor:", corteAutoSENATRAN1[1])
         AutoSenatran = corteAutoSENATRAN2[0]
+
+        corteDescontoSENATRAN1 = re.split("Valor:", texto_lista[cont])
+        corteDescontoSENATRAN2 =  re.split("Código da Infração:", corteDescontoSENATRAN1[1])
+        valorTotalSENATRAN = corteDescontoSENATRAN2[0].replace(' R$ ', '').replace('\n', '')
+
         boleto, valor, dataVenc = encontrar_boletos(texto_lista[cont])
         
+        valorLimpo = valor.replace(',', '.').strip()
+        desconto = float(valorLimpo)
+
+        valorTotalLimpo = valorTotalSENATRAN.replace(',', '.').strip()
+        total = float(valorTotalLimpo)
+
+        valorDescontoSENATRAN = total - desconto
+        valorDescontoSENATRAN = round(valorDescontoSENATRAN, 2)  # Arredonda para 2 casas decimais
+
+        valorDescontoSENATRAN = str(valorDescontoSENATRAN).replace('.', ',')
+
         nomeBeneficiario = "SENATRAN SNE"
 
         # Armazenando os resultados de cada extração
         resultados.append({
             'boleto': boleto,
             'valor': valor,
+            'desconto': valorDescontoSENATRAN,
             'data_vencimento': dataVenc,
             'nome_beneficiario': nomeBeneficiario,
-            'ait': AutoSenatran
+            'ait': AutoSenatran,
+            'codigo': codCliente
         })
         
+#resultados.sort(key=lambda x: x['boleto'], reverse=True)
+
 
 # Exibindo os resultados
 for resultado in resultados:
     print(resultado)
     
-caminho_excel = r'C:\Users\stefany\Desktop\diogo\TESTE.xlsx'
+caminho_excel = r'C:\Users\diogo.lana\Desktop\Diogo\TESTE2.xlsx'
+
 
 # Adicionar os dados ao Excel
 adicionar_ao_excel(resultados, caminho_excel)

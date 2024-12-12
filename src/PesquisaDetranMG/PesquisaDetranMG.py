@@ -467,21 +467,6 @@ def iniciar_automacao():
                                             
                                             time.sleep(2)
 
-                                            pyautogui.hotkey('ctrl', 'p')
-
-                                            time.sleep(2)
-
-                                            # Caminha para selecionar o download como PDF
-                                            for i in range(5):
-                                                pyautogui.hotkey('tab')
-                                            time.sleep(1.5)
-                                            pyautogui.press('down')
-                                            time.sleep(1.5)
-                                            for i in range(6):
-                                                pyautogui.hotkey('tab')
-                                            time.sleep(1.5)
-                                            pyautogui.hotkey('enter')
-
                                             #EMITI A NOTIFICAÇÃO
                                         
                                         #Clica para consulta a proxima autuação
@@ -1188,7 +1173,7 @@ btn_iniciar.pack(pady=20)
 # Créditos ao criador com meio de contato
 lbl_creditos = tk.Label(
     root,
-    text="Desenvolvido por João Silva\nContato: joao.silva@email.com",
+    text="Desenvolvido por Diogo Lana\nContato: diogosilvalana27@gmail.com",
     font=("Arial", 8, "italic"),
     bg="#FFFFFF",
     fg="#4A4A4A",
@@ -1197,4 +1182,4 @@ lbl_creditos = tk.Label(
 lbl_creditos.pack(side="bottom", pady=10)
 
 # Rodar a interface
-root.mainloop()
+root.mainloop() 
