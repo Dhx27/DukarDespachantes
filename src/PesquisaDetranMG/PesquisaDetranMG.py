@@ -102,7 +102,11 @@ def iniciar_automacao():
 
 
         # Sua chave API do 2Captcha
+<<<<<<< HEAD
         API_KEY = 'eeb575d73a49bce84a1f07a6c59019de'
+=======
+        API_KEY = 'chave'
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
 
         # data-sitekey do reCAPTCHA (obtido ao inspecionar a página)
         GOOGLE_KEY = '6LfVpnIUAAAAAHkISk6Z6juZcsUx6hbyJGwfnfPL'
@@ -467,6 +471,24 @@ def iniciar_automacao():
                                             
                                             time.sleep(2)
 
+<<<<<<< HEAD
+=======
+                                            pyautogui.hotkey('ctrl', 'p')
+
+                                            time.sleep(2)
+
+                                            # Caminha para selecionar o download como PDF
+                                            for i in range(5):
+                                                pyautogui.hotkey('tab')
+                                            time.sleep(1.5)
+                                            pyautogui.press('down')
+                                            time.sleep(1.5)
+                                            for i in range(6):
+                                                pyautogui.hotkey('tab')
+                                            time.sleep(1.5)
+                                            pyautogui.hotkey('enter')
+
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
                                             #EMITI A NOTIFICAÇÃO
                                         
                                         #Clica para consulta a proxima autuação
@@ -1173,7 +1195,11 @@ btn_iniciar.pack(pady=20)
 # Créditos ao criador com meio de contato
 lbl_creditos = tk.Label(
     root,
+<<<<<<< HEAD
     text="Desenvolvido por Diogo Lana\nContato: diogosilvalana27@gmail.com",
+=======
+    text="Desenvolvido por João Silva\nContato: joao.silva@email.com",
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
     font=("Arial", 8, "italic"),
     bg="#FFFFFF",
     fg="#4A4A4A",
@@ -1182,4 +1208,8 @@ lbl_creditos = tk.Label(
 lbl_creditos.pack(side="bottom", pady=10)
 
 # Rodar a interface
+<<<<<<< HEAD
 root.mainloop() 
+=======
+root.mainloop()
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d

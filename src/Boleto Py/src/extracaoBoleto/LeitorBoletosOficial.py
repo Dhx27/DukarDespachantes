@@ -25,6 +25,7 @@ def adicionar_ao_excel(resultados, caminho_excel):
 
     # Adiciona os resultados
     for resultado in resultados:
+<<<<<<< HEAD
         instanciaExcel.append([
             resultado['boleto'],
             resultado['nome_beneficiario'],
@@ -34,13 +35,20 @@ def adicionar_ao_excel(resultados, caminho_excel):
             resultado['ait'],
             resultado['codigo']
         ])
+=======
+        instanciaExcel.append([resultado['boleto'], resultado['nome_beneficiario'], resultado['data_vencimento'], resultado['valor'], resultado['ait']])
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
 
     # Salva o arquivo Excel
     excel.save(caminho_excel)
     print(f"Dados salvos em {caminho_excel}")
 
 
+<<<<<<< HEAD
 caminho_pdf = r"M:\TI\ROBOS\ROBOS_EM_DEV\Automação Python\Boleto Py\data\boletosConcatenados\PDFsam_merge.pdf"
+=======
+caminho_pdf = r"C:\Users\stefany\Desktop\diogo\PDFsam_merge.pdf"
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
 texto_lista = []
 resultados = []  # Lista para armazenar os resultados
 
@@ -329,9 +337,14 @@ for cont in range(len(texto_lista)):
         
         print(texto_lista[cont])
         
+        corteOrgao1 =  re.split("Órgão Competente: ", texto_lista[cont])
+        corteOrgao2 = re.split("Código do Órgão Autuador:", corteOrgao1[1])
+        nomeBeneficiario = corteOrgao2[0].replace("\n", "")
+        
         corteAutoSENATRAN1 = re.split("Auto de Infração: ", texto_lista[cont])
         corteAutoSENATRAN2 = re.split(" Valor:", corteAutoSENATRAN1[1])
         AutoSenatran = corteAutoSENATRAN2[0]
+<<<<<<< HEAD
 
         corteDescontoSENATRAN1 = re.split("Valor:", texto_lista[cont])
         corteDescontoSENATRAN2 =  re.split("Código da Infração:", corteDescontoSENATRAN1[1])
@@ -351,7 +364,13 @@ for cont in range(len(texto_lista)):
         valorDescontoSENATRAN = str(valorDescontoSENATRAN).replace('.', ',')
 
         nomeBeneficiario = "SENATRAN SNE"
+=======
+        
+        boleto, valor, dataVenc = encontrar_boletos(texto_lista[cont])
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
 
+        boleto = boleto.replace(".", "")
+        
         # Armazenando os resultados de cada extração
         resultados.append({
             'boleto': boleto,
@@ -370,8 +389,12 @@ for cont in range(len(texto_lista)):
 for resultado in resultados:
     print(resultado)
     
+<<<<<<< HEAD
 caminho_excel = r'C:\Users\diogo.lana\Desktop\Diogo\TESTE2.xlsx'
 
+=======
+caminho_excel = r'C:\Users\stefany\Desktop\diogo\TESTE1.xlsx'
+>>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
 
 # Adicionar os dados ao Excel
 adicionar_ao_excel(resultados, caminho_excel)
