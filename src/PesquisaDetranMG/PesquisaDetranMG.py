@@ -45,7 +45,7 @@ def criar_pasta_saida(caminho_planilha, base_saida):
     
     # Cria as subpastas "multas" e "notificação" dentro da pasta de saída
     pasta_multas = os.path.join(pasta_saida, "multas")
-    pasta_notificacao = os.path.join(pasta_saida, "notificação")
+    pasta_notificacao = os.path.join(pasta_saida, "notificacao")
     
     for pasta in [pasta_multas, pasta_notificacao]:
         if not os.path.exists(pasta):
@@ -102,11 +102,7 @@ def iniciar_automacao():
 
 
         # Sua chave API do 2Captcha
-<<<<<<< HEAD
         API_KEY = 'eeb575d73a49bce84a1f07a6c59019de'
-=======
-        API_KEY = 'chave'
->>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
 
         # data-sitekey do reCAPTCHA (obtido ao inspecionar a página)
         GOOGLE_KEY = '6LfVpnIUAAAAAHkISk6Z6juZcsUx6hbyJGwfnfPL'
@@ -469,28 +465,33 @@ def iniciar_automacao():
                                             #Salva os resultados na planilha
                                             planilha.save(caminho_planilha)
                                             
-                                            time.sleep(2)
+                                            time.sleep(3)
 
-<<<<<<< HEAD
-=======
+                                            #EMITI A NOTIFICAÇÃO
                                             pyautogui.hotkey('ctrl', 'p')
-
-                                            time.sleep(2)
+                                            time.sleep(5)
 
                                             # Caminha para selecionar o download como PDF
                                             for i in range(5):
                                                 pyautogui.hotkey('tab')
                                             time.sleep(1.5)
-                                            pyautogui.press('down')
+                                            pyautogui.write("salvar")
                                             time.sleep(1.5)
                                             for i in range(6):
                                                 pyautogui.hotkey('tab')
                                             time.sleep(1.5)
                                             pyautogui.hotkey('enter')
 
->>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
-                                            #EMITI A NOTIFICAÇÃO
-                                        
+                                            time.sleep(3)
+                                            # Define o caminho de salvamento
+                                            caminhoAutuacao = os.path.join(pasta_notificacao, valorNumeroAIT)
+
+                                            # Torna o caminho compatível com digitação em `pyautogui`
+                                            caminhoAutuacao = os.path.normpath(caminhoAutuacao)  # Converte barras para o formato correto
+                                            pyautogui.write(caminhoAutuacao)
+                                            time.sleep(1)
+                                            pyautogui.hotkey('enter')     
+
                                         #Clica para consulta a proxima autuação
                                         campoVoltarDadosVeiculos = navegador.find_element(By.CSS_SELECTOR, "#content > div:nth-child(8) > a")
                                         navegador.execute_script("arguments[0].click();", campoVoltarDadosVeiculos)
@@ -611,6 +612,29 @@ def iniciar_automacao():
                                                 time.sleep(3)
 
                                                 #EMITI A NOTIFICAÇÃO
+                                                pyautogui.hotkey('ctrl', 'p')
+                                                time.sleep(5)
+
+                                                # Caminha para selecionar o download como PDF
+                                                for i in range(5):
+                                                    pyautogui.hotkey('tab')
+                                                time.sleep(1.5)
+                                                pyautogui.write("salvar")
+                                                time.sleep(1.5)
+                                                for i in range(6):
+                                                    pyautogui.hotkey('tab')
+                                                time.sleep(1.5)
+                                                pyautogui.hotkey('enter')
+
+                                                time.sleep(3)
+                                                # Define o caminho de salvamento
+                                                caminhoAutuacao = os.path.join(pasta_notificacao, valorNumeroAIT)
+
+                                                # Torna o caminho compatível com digitação em `pyautogui`
+                                                caminhoAutuacao = os.path.normpath(caminhoAutuacao)  # Converte barras para o formato correto
+                                                pyautogui.write(caminhoAutuacao)
+                                                time.sleep(1)
+                                                pyautogui.hotkey('enter') 
                                             
                                             try:
                                                 
@@ -1156,12 +1180,12 @@ root.geometry("400x300")
 root.configure(bg="#FFFFFF")  # Fundo branco
 
 # Adicionar a logo do DETRAN-MG como ícone da janela
-root.iconbitmap(r"C:\Users\diogo.lana\Desktop\Nova pasta\Nova pasta\DukarDespachantes\src\PesquisaDetranMG\detran_mg.ico")
+root.iconbitmap(r"M:\TI\ROBOS\ROBOS_EM_DEV\Automação Python\DukarDespachantes\src\PesquisaDetranMG\detran_mg.ico")
 
 # Label inicial com texto padrão
 lbl_texto = tk.Label(
     root,
-    text="Selecione os caminhos de saída e entrada dos arquivos:",
+    text="Selecione os caminhos entrada dos arquivos excel:",
     font=("Arial", 10, "bold"),
     justify="center",
     anchor="center",
@@ -1195,11 +1219,7 @@ btn_iniciar.pack(pady=20)
 # Créditos ao criador com meio de contato
 lbl_creditos = tk.Label(
     root,
-<<<<<<< HEAD
     text="Desenvolvido por Diogo Lana\nContato: diogosilvalana27@gmail.com",
-=======
-    text="Desenvolvido por João Silva\nContato: joao.silva@email.com",
->>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
     font=("Arial", 8, "italic"),
     bg="#FFFFFF",
     fg="#4A4A4A",
@@ -1208,8 +1228,4 @@ lbl_creditos = tk.Label(
 lbl_creditos.pack(side="bottom", pady=10)
 
 # Rodar a interface
-<<<<<<< HEAD
 root.mainloop() 
-=======
-root.mainloop()
->>>>>>> 153857930df4c37d92ebdd1d6710363e2ade643d
