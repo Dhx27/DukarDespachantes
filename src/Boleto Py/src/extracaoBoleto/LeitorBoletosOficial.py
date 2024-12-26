@@ -182,7 +182,7 @@ for cont in range(len(texto_lista)):
             'nome_beneficiario': nomeBeneficiario,
             'ait': autoES,
             'codigo': codCliente,
-            'cnpj': 0
+            'cnpj': "28162105000166"
             })
 
     elif "DNIT" in texto_lista[cont]:
@@ -340,7 +340,7 @@ for cont in range(len(texto_lista)):
             'nome_beneficiario': nomeBeneficiario,
             'ait': AutoPARANA,
             'codigo': codCliente,
-            'cnpj': 0
+            'cnpj': "78206513000140"
         })
         
     elif "SENATRAN SNE" in texto_lista[cont]:
