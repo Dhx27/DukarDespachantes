@@ -99,8 +99,8 @@ tela1GOV = WebDriverWait(navegador, 100).until(
 # Cria uma instância de ActionChains
 actions = ActionChains(navegador)
 
-cpfLogin = "62127152620"
-senhaLogin = "covjic-byfpAv-0rapgo"
+cpfLogin = ""
+senhaLogin = ""
 
 #Inseri o CPF no campo do CPF
 campoCPF = navegador.find_element(By.CSS_SELECTOR, "#accountId")
