@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from dotenv import load_dotenv
 
 CnpjCliente = "07563781000171"
 pathEntrada = r'C:\Users\diogo.lana\Desktop\TESTE\MODELO (2).xlsx'

@@ -16,6 +16,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import threading
+from dotenv import load_dotenv
 
 
 # Variáveis globais para armazenar os caminhos selecionados
@@ -102,7 +103,7 @@ def iniciar_automacao():
 
 
         # Sua chave API do 2Captcha
-        API_KEY = 'eeb575d73a49bce84a1f07a6c59019de'
+        API_KEY = "api_key"
 
         # data-sitekey do reCAPTCHA (obtido ao inspecionar a página)
         GOOGLE_KEY = '6LfVpnIUAAAAAHkISk6Z6juZcsUx6hbyJGwfnfPL'
@@ -185,8 +186,8 @@ def iniciar_automacao():
         # Cria uma instância de ActionChains
         actions = ActionChains(navegador)
 
-        cpfLogin = "62127152620"
-        senhaLogin = "N@to95037844"
+        cpfLogin = "CPF"
+        senhaLogin = "SENHA"
 
         #Inseri o CPF no campo do CPF
         campoCPF = navegador.find_element(By.CSS_SELECTOR, "#accountId")

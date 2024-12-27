@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from dotenv import load_dotenv
 
 
 entradaExcel = r"C:\Users\diogo.lana\Desktop\Diogo\BASE WAY TO GO SENATRAN.xlsx"
@@ -51,7 +52,7 @@ try:
     campoCPF = WebDriverWait(navegador, 60).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "#accountId"))
     )
-    campoCPF.send_keys("62127152620")
+    campoCPF.send_keys("CPF")
 
     botaoContinuarLogin = navegador.find_element(By.CSS_SELECTOR, "#enter-account-id")
     botaoContinuarLogin.click()
@@ -59,7 +60,7 @@ try:
     campoSenha =  WebDriverWait(navegador, 1000).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "#password"))
     )
-    campoSenha.send_keys("N@to95037844")
+    campoSenha.send_keys("SENHA")
 
     botaoEntrar = navegador.find_element(By.CSS_SELECTOR, "#submit-button")
     botaoEntrar.click()
