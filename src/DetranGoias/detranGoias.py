@@ -54,6 +54,7 @@ try:
 
     botaoEntrar = navegador.find_element(By.CSS_SELECTOR, "#submit-button")
     botaoEntrar.click()
+    
     print ("DIogo")
     
     
