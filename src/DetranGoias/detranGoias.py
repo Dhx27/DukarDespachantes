@@ -24,4 +24,41 @@ navegador.maximize_window()
 
 navegador.get("https://www.go.gov.br/servicos/servico/consultar-veiculo--ipva-multas-e-crlv")
 
+#Aguarda até o elemento ficar visível (com um timeout de 60 segundos)
+try:
+    
+    #Esperar o botão de acessas e clicar nele
+    botaoAcessar = WebDriverWait(navegador, 1000).until(
+        EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/app-main/div/div/app-sidenav/div/div/div/app-servico-detalhe/div/div[2]/div/app-botao-acessar/div/button"))
+    ).click()
+    
+    #Esperar tela de atenção para clicar no botão entrar com o GOV
+    botaoAcessarGOV = WebDriverWait(navegador, 60).until(
+        EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/app-modal-item[1]/div/div/div/div[2]/div/div/button"))
+    ).click()
+    
+    time.sleep(5)
+    
+    campoCPF = WebDriverWait(navegador, 60).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "#accountId"))
+    )
+    campoCPF.send_keys(os.getenv("CPF"))
+
+    botaoContinuarLogin = navegador.find_element(By.CSS_SELECTOR, "#enter-account-id")
+    botaoContinuarLogin.click()
+
+    campoSenha =  WebDriverWait(navegador, 1000).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "#password"))
+    )
+    campoSenha.send_keys(os.getenv("SENHA"))
+
+    botaoEntrar = navegador.find_element(By.CSS_SELECTOR, "#submit-button")
+    botaoEntrar.click()
+    print ("DIogo")
+    
+    
+except TimeoutException:
+    print("LOGIN NO SITE NN REALIZADO")
+
+
 navegador.quit()
