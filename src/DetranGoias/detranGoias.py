@@ -110,14 +110,53 @@ try:
                 EC.text_to_be_present_in_element((By.CSS_SELECTOR, "body > div > div > div > div > div > lib-detalhes-veiculo > div > exui-abas > div > div > exui-aba:nth-child(1) > div > lib-dados-veiculo > div > div > exui-card-detalhamento > exui-card > mat-card > div > div"), placa_atual)
             )
 
-            
+            campo_debitos_veiculo = navegador.find_element(By.CSS_SELECTOR, "lib-detalhes-veiculo exui-abas > div > ul > li:nth-child(2) span")
+            campo_debitos_veiculo.click()
+
+            campo_ipva = WebDriverWait(navegador, 60).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "div:nth-child(1) > exui-card-info > div"))
+            ).click()
+
+            tabela_ipva = WebDriverWait(navegador, 60).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "#debIpva table"))
+            )
+
+            linhas_ipva = tabela_ipva.find_elements(By.TAG_NAME, "tr")
+            numero_linhas_ipva = len(linhas_ipva)
+
+            valor_total_ipvas = 0
+
+            for cont in range(1, numero_linhas_ipva):
+
+                selector_situacao_ipva = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-valorIpva.mat-column-valorIpva.ng-star-inserted"
+                campo_situacao_ipva = navegador.find_element(By.CSS_SELECTOR, selector_situacao_ipva)
+
+                situacao_ipva = campo_situacao_ipva.text 
+
+                if situacao_ipva != "PAGO":
+
+                    selector_ano_ipva = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-anoExercicio.mat-column-anoExercicio.ng-star-inserted"
+                    campo_ano_ipva = navegador.find_element(By.CSS_SELECTOR, selector_ano_ipva)
+
+                    ano_ipva = campo_ano_ipva.text
+
+                    selector_valor_total = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-valorTotal.mat-column-valorTotal.ng-star-inserted"
+                    campo_valor_total = navegador.find_element(By.CSS_SELECTOR, selector_valor_total)
+
+                    valor_total = (campo_valor_total.text).replace("R$ ", "")
+
+                    valor_total_ipvas += valor_total
+
+                    selector_botao_pagar = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-botao.mat-column-botao.ng-star-inserted > div > exui-button-primary:nth-child(1) > button"
+                    botao_pagar = navegador.find_element(By.CSS_SELECTOR, selector_botao_pagar)
+
+                    botao_pagar.click()
 
 
 
 
-    
-        
-    
+
+
     
 except TimeoutException:
     print("LOGIN NO SITE NN REALIZADO")
