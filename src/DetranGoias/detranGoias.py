@@ -12,9 +12,44 @@ import requests
 from selenium.webdriver.common.keys import Keys  # Para acessar as teclas especiais
 from selenium.webdriver.common.action_chains import ActionChains
 import os
+import pyautogui
+
+# Caminha para selecionar o download como PDF
+def selecionar_download_como_pdf(pasta_downloads, placa_atual, cont):
+    
+    # Navegar pelas opções até "Salvar"
+    for _ in range(5):  # Pressiona 'tab' 5 vezes
+        pyautogui.hotkey('tab')
+    time.sleep(1.5)
+
+    pyautogui.write("salvar")  # Digita "salvar"
+    time.sleep(1.5)
+
+        # Navegar até o botão de salvar
+    for _ in range(3):  # Pressiona 'tab' 6 vezes
+        pyautogui.hotkey('tab')
+    time.sleep(1.5)
+
+    pyautogui.hotkey('enter')  # Confirma "Salvar"
+    time.sleep(3)
+
+    # Define o caminho completo para salvar o arquivo
+    caminho_download = os.path.join(pasta_downloads, f"{placa_atual}_{cont}")
+    caminho_download = os.path.normpath(caminho_download)  # Normaliza o caminho
+
+    # Digitar o caminho de salvamento
+    pyautogui.write(caminho_download)
+    time.sleep(1)
+    pyautogui.hotkey('enter')  # Confirma o caminho
+
+    print("Arquivo salvo com sucesso!")
 
 
-caminho_planilha = r'M:\TI\ROBOS\ROBOS_EM_DEV\Automação Python\DukarDespachantes\data\BASE DETRAN GOIAS.xlsx'
+pasta_downloads = r"C:\Users\Diogo Lana\Desktop\Nova pasta"
+
+load_dotenv()
+
+caminho_planilha = r'C:\Users\Diogo Lana\Desktop\Nova pasta\BASE DETRAN GOIAS.xlsx'
 
 #Abri a planilha do excel
 planilha = load_workbook(caminho_planilha)
@@ -75,17 +110,31 @@ try:
     telaInicial = WebDriverWait(navegador, 60).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "exui-titulo-servico"))
     )
+    
+    '''
+    Validação para obter a posição na tela
+    time.sleep(5)
+    # Obtém a posição atual do mouse
+    posicao = pyautogui.position()
+    print(f"Coordenadas do mouse: {posicao}")
+    '''
+    
+    pyautogui.leftClick(x=1197, y=386)
 
+    time.sleep(2)
+    
     botaoRealizarConsulta = WebDriverWait(navegador, 30).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, "body  exui-button-secondary > button"))
     ).click()
 
+    linhaPlan = 1
     while index < len(linhas):
+        linhaPlan += 1
         row = linhas[index]
 
         placa_atual = row[0].value
         renavam_atual = row[1].value
-        status_atual = row[2].value
+        status_atual = row[3].value
 
         if status_atual is None:
 
@@ -93,12 +142,12 @@ try:
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "exui-card-formulario-status > mat-card"))
             )
 
-            campo_placa = navegador.find_element(By.CSS_SELECTOR, "#mat-input-0")
+            campo_placa = navegador.find_element(By.XPATH, '(//input[contains(@class, "mat-input-element")])[1]')
             campo_placa.send_keys(placa_atual)
 
             time.sleep(2)
 
-            campo_renavam = navegador.find_element(By.CSS_SELECTOR, "#mat-input-1")
+            campo_renavam = navegador.find_element(By.XPATH, '(//input[contains(@class, "mat-input-element")])[2]')
             campo_renavam.send_keys(renavam_atual)
 
             time.sleep(1.5)
@@ -133,7 +182,7 @@ try:
 
                 situacao_ipva = campo_situacao_ipva.text 
 
-                if situacao_ipva != "PAGO":
+                if situacao_ipva not in ["PAGO", "ISENTO"]:
 
                     selector_ano_ipva = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-anoExercicio.mat-column-anoExercicio.ng-star-inserted"
                     campo_ano_ipva = navegador.find_element(By.CSS_SELECTOR, selector_ano_ipva)
@@ -143,23 +192,83 @@ try:
                     selector_valor_total = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-valorTotal.mat-column-valorTotal.ng-star-inserted"
                     campo_valor_total = navegador.find_element(By.CSS_SELECTOR, selector_valor_total)
 
-                    valor_total = (campo_valor_total.text).replace("R$ ", "")
-
+                    valor_total = campo_valor_total.text.strip()
+                    valor_total = valor_total.replace("R$ ", "")  # Remove o prefixo "R$ "
+                    valor_total = valor_total.replace(".", "")    # Remove pontos (separadores de milhar)
+                    valor_total = valor_total.replace(",", ".")   # Substitui vírgula decimal por ponto
+                    valor_total = float(valor_total)              # Converte para float
                     valor_total_ipvas += valor_total
 
                     selector_botao_pagar = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-botao.mat-column-botao.ng-star-inserted > div > exui-button-primary:nth-child(1) > button"
                     botao_pagar = navegador.find_element(By.CSS_SELECTOR, selector_botao_pagar)
 
                     botao_pagar.click()
+                    
+                    tela_confirmacao = WebDriverWait(navegador, 60).until(
+                        EC.visibility_of_element_located((By.CSS_SELECTOR, "#swal2-title"))
+                    )
+                    
+                    botao_confirmar = navegador.find_element(By.CSS_SELECTOR, "body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.exui-fill-button.swal2-styled")
+                    botao_confirmar.click()
+                    
+                    tela_forma_pagamento = WebDriverWait(navegador, 60).until(
+                        EC.visibility_of_element_located((By.XPATH, "/html/body/app-root/app-raiz-servicos-digitais/body/div/div/div/div/div/lib-detalhes-veiculo/div/exui-abas/div/div/exui-aba[2]/div/lib-debitos-veiculo/lib-modal-forma-de-pagamento/exui-modal-item/div/div/div[2]"))
+                    )
+                    
+                    time.sleep(2)
+                    
+                    botao_dowload_boleto = navegador.find_element(By.XPATH, "/html/body/app-root/app-raiz-servicos-digitais/body/div/div/div/div/div/lib-detalhes-veiculo/div/exui-abas/div/div/exui-aba[2]/div/lib-debitos-veiculo/lib-modal-forma-de-pagamento/exui-modal-item/div/div/div[2]/exui-card/mat-card/mat-card-content/div/div[2]/div[2]/exui-button-secondary/button")
+                    botao_dowload_boleto.click()
+                    
+                    tela_downloads = WebDriverWait(navegador, 60).until(
+                        EC.visibility_of_element_located((By.CSS_SELECTOR, "div.header-modal-wrap"))
+                    )
+                    
+                    '''
+                    Validação para obter a posição na tela
+                    time.sleep(5)
+                    # Obtém a posição atual do mouse
+                    posicao = pyautogui.position()
+                    print(f"Coordenadas do mouse: {posicao}")
+                    '''            
+                    
+                    time.sleep(5)
+                    
+                    # Coordenadas onde o clique será feito
+                    x, y = 1110, 184
 
-
-
-
-
-
-    
+                    # Clique com o botão direito na posição especificada
+                    pyautogui.leftClick(x=x, y=y)
+                    
+                    time.sleep(2)
+                    
+                    selecionar_download_como_pdf(pasta_downloads, placa_atual, cont)
+                    
+                    time.sleep(2)
+                    
+                    '''
+                    #Validação para obter a posição na tela
+                    time.sleep(5)
+                    # Obtém a posição atual do mouse
+                    posicao = pyautogui.position()
+                    print(f"Coordenadas do mouse: {posicao}")
+                    '''
+                    pyautogui.leftClick(x=1141, y=132)
+                    
+                    
+            guia_dados[f'C{linhaPlan}'] = valor_total_ipvas
+            guia_dados[f'D{linhaPlan}'] = "OK!"
+            
+            botao_voltar = WebDriverWait(navegador, 60).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "lib-detalhes-veiculo > div > div > exui-button-no-border > button"))
+            ).click()
+            
+        index += 1
+        planilha.save(caminho_planilha)
+                    
 except TimeoutException:
-    print("LOGIN NO SITE NN REALIZADO")
-
-
+    
+    print("Renicie a automação")
+    breakpoint()
+    
 navegador.quit()
