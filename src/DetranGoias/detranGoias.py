@@ -13,6 +13,8 @@ from selenium.webdriver.common.keys import Keys  # Para acessar as teclas especi
 from selenium.webdriver.common.action_chains import ActionChains
 import os
 import pyautogui
+import pdfplumber
+import re
 
 # Caminha para selecionar o download como PDF
 def selecionar_download_como_pdf(pasta_downloads, placa_atual, cont):
@@ -49,7 +51,7 @@ pasta_downloads = r"C:\Users\Diogo Lana\Desktop\Nova pasta"
 
 load_dotenv()
 
-caminho_planilha = r'C:\Users\Diogo Lana\Desktop\Nova pasta\BASE DETRAN GOIAS.xlsx'
+caminho_planilha = r'C:\Users\Diogo Lana\Desktop\Nova pasta\BASE DETRAN GOIAS 212 PLACAS.xlsx'
 
 #Abri a planilha do excel
 planilha = load_workbook(caminho_planilha)
@@ -60,7 +62,7 @@ guia_dados = planilha['BASE']
 #Passa os cabeçalhos
 guia_dados['A1'] = "PLACA"
 guia_dados['B1'] = "RENAVAM"
-guia_dados['D1'] = "STATUS"
+guia_dados['D1'] = "STATUS SITE"
 
 index = 0
 linhas = list(guia_dados.iter_rows(min_row=2 , max_row= guia_dados.max_row))
@@ -112,14 +114,14 @@ try:
     )
     
     '''
-    Validação para obter a posição na tela
+    #Validação para obter a posição na tela
     time.sleep(5)
     # Obtém a posição atual do mouse
     posicao = pyautogui.position()
     print(f"Coordenadas do mouse: {posicao}")
     '''
     
-    pyautogui.leftClick(x=1197, y=386)
+    pyautogui.leftClick(x=1197, y=394)
 
     time.sleep(2)
     
@@ -134,9 +136,11 @@ try:
 
         placa_atual = row[0].value
         renavam_atual = row[1].value
-        status_atual = row[3].value
+        status_atual = row[2].value
 
         if status_atual is None:
+
+            time.sleep(5)
 
             tela_pesquisa = WebDriverWait(navegador, 60).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "exui-card-formulario-status > mat-card"))
@@ -156,8 +160,10 @@ try:
             botao_consultar.click()
 
             tela_dados_veiculo = WebDriverWait(navegador, 60).until(
-                EC.text_to_be_present_in_element((By.CSS_SELECTOR, "body > div > div > div > div > div > lib-detalhes-veiculo > div > exui-abas > div > div > exui-aba:nth-child(1) > div > lib-dados-veiculo > div > div > exui-card-detalhamento > exui-card > mat-card > div > div"), placa_atual)
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "body > div > div > div > div > div > lib-detalhes-veiculo > div > exui-abas > div > div > exui-aba:nth-child(1) > div > lib-dados-veiculo > div > div > exui-card-detalhamento > exui-card > mat-card > div > div"))
             )
+
+            time.sleep(3)
 
             campo_debitos_veiculo = navegador.find_element(By.CSS_SELECTOR, "lib-detalhes-veiculo exui-abas > div > ul > li:nth-child(2) span")
             campo_debitos_veiculo.click()
@@ -173,7 +179,6 @@ try:
             linhas_ipva = tabela_ipva.find_elements(By.TAG_NAME, "tr")
             numero_linhas_ipva = len(linhas_ipva)
 
-            valor_total_ipvas = 0
 
             for cont in range(1, numero_linhas_ipva):
 
@@ -182,13 +187,14 @@ try:
 
                 situacao_ipva = campo_situacao_ipva.text 
 
-                if situacao_ipva not in ["PAGO", "ISENTO"]:
+                if situacao_ipva not in ["PAGO", "ISENTO", "QUITADO SEFAZ", "ISENTO / PAGO", "----"]:
 
                     selector_ano_ipva = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-anoExercicio.mat-column-anoExercicio.ng-star-inserted"
                     campo_ano_ipva = navegador.find_element(By.CSS_SELECTOR, selector_ano_ipva)
 
                     ano_ipva = campo_ano_ipva.text
 
+                    '''
                     selector_valor_total = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-valorTotal.mat-column-valorTotal.ng-star-inserted"
                     campo_valor_total = navegador.find_element(By.CSS_SELECTOR, selector_valor_total)
 
@@ -198,7 +204,8 @@ try:
                     valor_total = valor_total.replace(",", ".")   # Substitui vírgula decimal por ponto
                     valor_total = float(valor_total)              # Converte para float
                     valor_total_ipvas += valor_total
-
+                    '''
+                    
                     selector_botao_pagar = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-botao.mat-column-botao.ng-star-inserted > div > exui-button-primary:nth-child(1) > button"
                     botao_pagar = navegador.find_element(By.CSS_SELECTOR, selector_botao_pagar)
 
@@ -225,17 +232,17 @@ try:
                     )
                     
                     '''
-                    Validação para obter a posição na tela
+                    #Validação para obter a posição na tela
                     time.sleep(5)
                     # Obtém a posição atual do mouse
                     posicao = pyautogui.position()
                     print(f"Coordenadas do mouse: {posicao}")
-                    '''            
+                    '''    
                     
                     time.sleep(5)
                     
                     # Coordenadas onde o clique será feito
-                    x, y = 1110, 184
+                    x, y = 1113, 188
 
                     # Clique com o botão direito na posição especificada
                     pyautogui.leftClick(x=x, y=y)
@@ -253,12 +260,11 @@ try:
                     posicao = pyautogui.position()
                     print(f"Coordenadas do mouse: {posicao}")
                     '''
-                    pyautogui.leftClick(x=1141, y=132)
+                    pyautogui.leftClick(x=1141, y=137)
                     
-                    
-            guia_dados[f'C{linhaPlan}'] = valor_total_ipvas
-            guia_dados[f'D{linhaPlan}'] = "OK!"
+            guia_dados[f'C{linhaPlan}'] = "OK!"
             
+
             botao_voltar = WebDriverWait(navegador, 60).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "lib-detalhes-veiculo > div > div > exui-button-no-border > button"))
             ).click()
@@ -272,3 +278,75 @@ except TimeoutException:
     breakpoint()
     
 navegador.quit()
+
+#TRATATIVA BOLETOS
+
+arquivos_pdfs = [f for f in os.listdir(pasta_downloads) if f.endswith('.pdf')]
+
+for arquivos in arquivos_pdfs:
+    
+    caminho_pdf = os.path.join(pasta_downloads, arquivos)
+    
+    with pdfplumber.open(caminho_pdf) as pdf:
+        for num_page, pagina in enumerate(pdf.pages):
+            texto_boleto = pagina.extract_text()
+        
+            # Extrair valor total
+            corte_valor_total1 = re.split("Sacador/Avalista CPF/CNPJ ", texto_boleto)
+            corte_valor_total2 = re.split("\nAutenticação Mecânica", corte_valor_total1[1])
+            valor_total = corte_valor_total2[0].strip()
+            valor_total = valor_total.replace('.', '').replace(',', '.')  # Ajustar o formato do número
+            
+            # Extrair proprietário
+            corte_propietarario1 = re.split("PROPRIETÁRIO: ", texto_boleto)
+            corte_propietarario2 = re.split("\nCPF/CNPJ:", corte_propietarario1[1])
+            valor_propietario = corte_propietarario2[0].strip()
+            
+            # Extrair valor do licenciamento
+            padrao = r"LICENCIAMENTO ANUAL \[2025\]\s+([\d.,]+)"
+            resultado = re.search(padrao, texto_boleto)
+            valor_licenciamento = resultado.group(1).replace('.', '').replace(',', '.')  # Ajustar o formato do número
+            
+            # Calcular valor do IPVA
+            valor1 = float(valor_total)
+            valor2 = float(valor_licenciamento)
+            valor_ipva = valor1 - valor2
+            
+            # Extrair a placa
+            padrao_placa = r"PLACA:\s+([A-Z0-9]+)"
+            resultado = re.search(padrao_placa, texto_boleto)
+            placa = resultado.group(1)
+            
+            # Exibir os valores extraídos
+            print(f"Arquivo: {placa}")
+            print(f"Proprietário: {valor_propietario}")
+            print(f"Valor Total: {valor1:.2f}")
+            print(f"Licenciamento: {valor2:.2f}")
+            print(f"IPVA: {valor_ipva:.2f}")
+            print("-" * 40)
+            
+            # Procurar a placa na planilha e preencher dados
+            for linha in range(2, guia_dados.max_row + 1):
+                celula_placa = guia_dados[f'A{linha}'].value  # Coluna 'A' contém as placas
+                if celula_placa == placa:  # Verificar se a placa da planilha corresponde à do boleto
+                    
+                    guia_dados[f'G{linha}'] = valor_propietario  # Coluna 'B': PROPRIETARIO
+                    guia_dados[f'F{linha}'] = valor_total  # Coluna 'C': VALOR TOTAL
+                    guia_dados[f'E{linha}'] = valor_licenciamento  # Coluna 'D': VALOR LIC
+                    guia_dados[f'D{linha}'] = valor_ipva  # Coluna 'E': VALOR IPVA
+                    guia_dados[f'H{linha}'] = "BOLETO PROCESSADO"  # Coluna 'F': STATUS BOLETO
+                    print(f"Dados preenchidos para a placa {placa} na linha {linha}.")
+                     # Salvar a planilha
+                    planilha.save(caminho_planilha)
+                    break
+            else:
+                print(f"Placa {placa} não encontrada na planilha.")
+            
+               
+
+            
+            
+
+
+
+
