@@ -141,15 +141,13 @@ try:
             tela_pesquisa = WebDriverWait(navegador, 60).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "exui-card-formulario-status > mat-card"))
             )
-            
-            time.sleep(5)
 
-            campo_placa = navegador.find_element(By.CSS_SELECTOR, "#mat-input-0")
+            campo_placa = navegador.find_element(By.XPATH, '(//input[contains(@class, "mat-input-element")])[1]')
             campo_placa.send_keys(placa_atual)
 
             time.sleep(2)
 
-            campo_renavam = navegador.find_element(By.CSS_SELECTOR, "#mat-input-1")
+            campo_renavam = navegador.find_element(By.XPATH, '(//input[contains(@class, "mat-input-element")])[2]')
             campo_renavam.send_keys(renavam_atual)
 
             time.sleep(1.5)
@@ -184,7 +182,7 @@ try:
 
                 situacao_ipva = campo_situacao_ipva.text 
 
-                if situacao_ipva != "PAGO":
+                if situacao_ipva != "PAGO" and  situacao_ipva != "ISENTO":
 
                     selector_ano_ipva = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-anoExercicio.mat-column-anoExercicio.ng-star-inserted"
                     campo_ano_ipva = navegador.find_element(By.CSS_SELECTOR, selector_ano_ipva)
@@ -214,12 +212,12 @@ try:
                     botao_confirmar.click()
                     
                     tela_forma_pagamento = WebDriverWait(navegador, 60).until(
-                        EC.visibility_of_element_located((By.CSS_SELECTOR, "lib-detalhes-veiculo > div > exui-abas > div > div > exui-aba:nth-child(2) > div > lib-debitos-veiculo > lib-modal-forma-de-pagamento > exui-modal-item > div > div > div.modal-interno.ng-tns-c302-32"))
+                        EC.visibility_of_element_located((By.XPATH, "/html/body/app-root/app-raiz-servicos-digitais/body/div/div/div/div/div/lib-detalhes-veiculo/div/exui-abas/div/div/exui-aba[2]/div/lib-debitos-veiculo/lib-modal-forma-de-pagamento/exui-modal-item/div/div/div[2]"))
                     )
                     
                     time.sleep(2)
                     
-                    botao_dowload_boleto = navegador.find_element(By.CSS_SELECTOR, "lib-detalhes-veiculo > div > exui-abas > div > div > exui-aba:nth-child(2) > div > lib-debitos-veiculo > lib-modal-forma-de-pagamento > exui-modal-item > div > div > div.modal-interno.ng-tns-c302-32 > exui-card > mat-card > mat-card-content > div > div:nth-child(2) > div:nth-child(2) > exui-button-secondary > button")
+                    botao_dowload_boleto = navegador.find_element(By.XPATH, "/html/body/app-root/app-raiz-servicos-digitais/body/div/div/div/div/div/lib-detalhes-veiculo/div/exui-abas/div/div/exui-aba[2]/div/lib-debitos-veiculo/lib-modal-forma-de-pagamento/exui-modal-item/div/div/div[2]/exui-card/mat-card/mat-card-content/div/div[2]/div[2]/exui-button-secondary/button")
                     botao_dowload_boleto.click()
                     
                     tela_downloads = WebDriverWait(navegador, 60).until(
@@ -234,7 +232,7 @@ try:
                     print(f"Coordenadas do mouse: {posicao}")
                     '''            
                     
-                    time.sleep(2)
+                    time.sleep(5)
                     
                     # Coordenadas onde o clique será feito
                     x, y = 1110, 184
