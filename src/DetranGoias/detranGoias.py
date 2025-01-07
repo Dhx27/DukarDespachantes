@@ -16,6 +16,22 @@ import pyautogui
 import pdfplumber
 import re
 
+#Cria uma pasta de saída baseada no nome da planilha e em um caminho de base fornecido.
+def criar_pasta_saida(caminho_planilha, pasta_downloads):
+
+    # Pega o nome do arquivo da planilha sem a extensão
+    nome_arquivo = os.path.splitext(os.path.basename(caminho_planilha))[0]
+
+    #Caminho da pasta de saída com base na pasta fornecida
+    pasta_saida = os.path.join(pasta_downloads, nome_arquivo)
+
+    #Verifica se a pasta de saída já existe, se não existir, cria a pasta
+    if not os.path.exists(pasta_saida):
+        os.makedirs(pasta_saida)
+        print(f"Pasta criada: {pasta_saida}")
+    else:
+        print(f"a pasta já existe: {pasta_saida}")
+
 # Caminha para selecionar o download como PDF
 def selecionar_download_como_pdf(pasta_downloads, placa_atual, cont):
     
@@ -47,11 +63,13 @@ def selecionar_download_como_pdf(pasta_downloads, placa_atual, cont):
     print("Arquivo salvo com sucesso!")
 
 
-pasta_downloads = r"C:\Users\Diogo Lana\Desktop\Nova pasta"
+pasta_downloads = r"M:\SEMINOVOS\ROBO_SEMINOVOS\EMISSAO IPVA-LIC GO"
 
 load_dotenv()
 
-caminho_planilha = r'C:\Users\Diogo Lana\Desktop\Nova pasta\BASE DETRAN GOIAS 212 PLACAS.xlsx'
+caminho_planilha = r"C:\Users\diogo.lana\Desktop\ENTRADA\PESQUISA GO - URGENTES 06-01.xlsx"
+
+pasta_saida = criar_pasta_saida(caminho_planilha, pasta_downloads)
 
 #Abri a planilha do excel
 planilha = load_workbook(caminho_planilha)
@@ -187,7 +205,7 @@ try:
 
                 situacao_ipva = campo_situacao_ipva.text 
 
-                if situacao_ipva not in ["PAGO", "ISENTO", "QUITADO SEFAZ", "ISENTO / PAGO", "----"]:
+                if situacao_ipva not in ["PAGO", "ISENTO", "QUITADO SEFAZ", "ISENTO / PAGO", "----", "PG OUTRA UF"]:
 
                     selector_ano_ipva = f"#debIpva tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-anoExercicio.mat-column-anoExercicio.ng-star-inserted"
                     campo_ano_ipva = navegador.find_element(By.CSS_SELECTOR, selector_ano_ipva)
@@ -249,7 +267,7 @@ try:
                     
                     time.sleep(2)
                     
-                    selecionar_download_como_pdf(pasta_downloads, placa_atual, cont)
+                    selecionar_download_como_pdf(pasta_saida, placa_atual, cont)
                     
                     time.sleep(2)
                     
@@ -281,11 +299,11 @@ navegador.quit()
 
 #TRATATIVA BOLETOS
 
-arquivos_pdfs = [f for f in os.listdir(pasta_downloads) if f.endswith('.pdf')]
+arquivos_pdfs = [f for f in os.listdir(pasta_saida) if f.endswith('.pdf')]
 
 for arquivos in arquivos_pdfs:
     
-    caminho_pdf = os.path.join(pasta_downloads, arquivos)
+    caminho_pdf = os.path.join(pasta_saida, arquivos)
     
     with pdfplumber.open(caminho_pdf) as pdf:
         for num_page, pagina in enumerate(pdf.pages):
@@ -341,11 +359,11 @@ for arquivos in arquivos_pdfs:
                     break
             else:
                 print(f"Placa {placa} não encontrada na planilha.")
-            
-               
+    
 
-            
-            
+
+
+
 
 
 
