@@ -1,0 +1,49 @@
+Solução em código
+
+import requests
+import time
+
+# Dados do Turnstile CAPTCHA
+API_KEY = "SUA_CHAVE_2CAPTCHA"
+SITEKEY = "SITEKEY_DO_CAPTCHA"
+PAGE_URL = "URL_DA_PAGINA"
+
+# 1. Enviar requisição para resolver o CAPTCHA
+def enviar_requisicao_captcha(api_key, sitekey, page_url):
+    url = "http://2captcha.com/in.php"
+    data = {
+        "key": api_key,
+        "method": "turnstile",
+        "sitekey": sitekey,
+        "pageurl": page_url,
+    }
+    response = requests.post(url, data=data)
+    if response.status_code == 200 and "OK|" in response.text:
+        captcha_id = response.text.split('|')[1]
+        return captcha_id
+    else:
+        raise Exception(f"Erro ao enviar captcha: {response.text}")
+
+# 2. Obter o token de resposta do CAPTCHA
+def obter_resposta_captcha(api_key, captcha_id):
+    url = f"http://2captcha.com/res.php?key={api_key}&action=get&id={captcha_id}"
+    while True:
+        response = requests.get(url)
+        if "CAPCHA_NOT_READY" in response.text:
+            print("Captcha ainda não resolvido, tentando novamente em 5 segundos...")
+            time.sleep(5)
+        elif "OK|" in response.text:
+            return response.text.split('|')[1]
+        else:
+            raise Exception(f"Erro ao obter resposta do captcha: {response.text}")
+
+# 3. Inserir o token na página (use Selenium ou outro método)
+def inserir_token(navegador, token):
+    try:
+        navegador.execute_script(
+            f"document.getElementById('g-recaptcha-response').innerHTML = '{token}';"
+        )
+        print("Token inserido com sucesso!")
+    except Exception as e:
+        raise Exception(f"Erro ao inserir token: {str(e)}")
+
