@@ -187,6 +187,7 @@ for cont in range(len(texto_lista)):
 
     elif "DNIT" in texto_lista[cont]:
 
+        print(texto_lista[cont])
 
         regex_cnpj = r'\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}'
 
@@ -210,7 +211,7 @@ for cont in range(len(texto_lista)):
         valorDescontoDNIT = corteDescontoDNIT2[0]
 
         corteDNITCodigo1 = re.split("Recibo do Pagador", texto_lista[cont])
-        corteDNITCodigo2 = re.split("Nosso-Número", corteDNITCodigo1[1])
+        corteDNITCodigo2 = re.split("Nosso-Número", corteDNITCodigo1[1].replace('001-9 ', ''))
         codigoBarrasDNIT = corteDNITCodigo2[0].replace(
             '\n', '').replace(' ', '').replace('-', '').replace('.', '')
         
@@ -389,7 +390,7 @@ for cont in range(len(texto_lista)):
 for resultado in resultados:
     print(resultado)
     
-caminho_excel = r'C:\Users\diogo.lana\Desktop\Diogo\TESTE2.xlsx'
+caminho_excel = r'C:\Users\matheus.santos\Desktop\Nova pasta\TESTE2.xlsx'
 
 
 # Adicionar os dados ao Excel

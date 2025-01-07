@@ -32,8 +32,10 @@ def criar_pasta_saida(caminho_planilha, pasta_downloads):
     else:
         print(f"a pasta já existe: {pasta_saida}")
 
+    return pasta_saida
+
 # Caminha para selecionar o download como PDF
-def selecionar_download_como_pdf(pasta_downloads, placa_atual, cont):
+def selecionar_download_como_pdf(pasta_saida, placa_atual, cont):
     
     # Navegar pelas opções até "Salvar"
     for _ in range(5):  # Pressiona 'tab' 5 vezes
@@ -52,7 +54,7 @@ def selecionar_download_como_pdf(pasta_downloads, placa_atual, cont):
     time.sleep(3)
 
     # Define o caminho completo para salvar o arquivo
-    caminho_download = os.path.join(pasta_downloads, f"{placa_atual}_{cont}")
+    caminho_download = os.path.join(pasta_saida, f"{placa_atual}_{cont}")
     caminho_download = os.path.normpath(caminho_download)  # Normaliza o caminho
 
     # Digitar o caminho de salvamento
@@ -67,7 +69,7 @@ pasta_downloads = r"M:\SEMINOVOS\ROBO_SEMINOVOS\EMISSAO IPVA-LIC GO"
 
 load_dotenv()
 
-caminho_planilha = r"C:\Users\diogo.lana\Desktop\ENTRADA\PESQUISA GO - URGENTES 06-01.xlsx"
+caminho_planilha = r"C:\Users\Robo01\Desktop\ENTRADA\LOCALIZA FINAL 3 - 4 07-01.xlsx"
 
 pasta_saida = criar_pasta_saida(caminho_planilha, pasta_downloads)
 
@@ -360,11 +362,3 @@ for arquivos in arquivos_pdfs:
             else:
                 print(f"Placa {placa} não encontrada na planilha.")
     
-
-
-
-
-
-
-
-
