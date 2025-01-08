@@ -1,4 +1,4 @@
-#ROBO DE EMISSÃO DE IPVA
+#ROBO DE EMISSÃO DE IPVA E LICENCIAMENTO
 from dotenv import load_dotenv
 from openpyxl import load_workbook
 import time
@@ -294,6 +294,7 @@ try:
         planilha.save(caminho_planilha)
                     
 except TimeoutException:
+    
     
     print("Renicie a automação")
     breakpoint()
