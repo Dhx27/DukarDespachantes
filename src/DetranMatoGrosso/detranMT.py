@@ -20,8 +20,8 @@ import re
 
 load_dotenv()
 
-pasta_download = r''
-caminho_planilha = r''
+pasta_download = r'C:\Users\diogo.lana\Desktop\TESTE'
+caminho_planilha = r'C:\Users\diogo.lana\Desktop\TESTE\MODELO MT.xlsx'
 
 # Dados do Turnstile CAPTCHA
 API_KEY = os.getenv("api_key")
@@ -77,7 +77,7 @@ def inserir_token(navegador, token):
 
 
 #Cria uma pasta de saída baseada no nome da planilha e em um caminho de base fornecido.
-def criar_pasta_saida(caminho_planilha, pasta_downloads):
+def criar_pasta_saida(pasta_download, caminho_planilha):
 
     #Pega o nome do arquivo excel sem a extensão
     nome_arquivo = os.path.splitext(os.path.basename(caminho_planilha))[0]
@@ -92,6 +92,7 @@ def criar_pasta_saida(caminho_planilha, pasta_downloads):
     else:
         print(f"A pasta já está criada {pasta_saida}")
 
+    return pasta_saida
 
 # Configurar o Chrome com um User-Agent falso usando undetected-chromedriver
 chrome_options = Options()
@@ -101,7 +102,43 @@ chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64
 navegador = uc.Chrome(options=chrome_options)
 navegador.maximize_window()
 
+pasta_saida = criar_pasta_saida(pasta_download, caminho_planilha)
+
+#Abri a planilha do excel
+planilha = load_workbook(caminho_planilha)
+
+#Passa a instacia da planilha BASE
+guia_dados = planilha['BASE']
+
+guia_dados ['A1'] = "PLACA"
+guia_dados ['B1'] = "RENAVAM"
+guia_dados ['C1'] = "CNPJ"
+guia_dados ['D1'] = "STATUS SITE"
+
+index = 0
+linhas = list(guia_dados.iter_rows(min_row=2, max_row=guia_dados.max_row))
+
 navegador.get("https://www.detran.mt.gov.br/")
+
+
+linhaPlan = 1
+while index < len(linhas):
+    linhaPlan += 1
+
+    row = linhas[index]
+
+    #Obtem todos os valores dispobniveis na planilha
+    placa_atual = row[0].value
+    renavam_atual = row[1].value
+    cnpj_atual = row[2].value
+    status_atual = row[3].value
+
+    if status_atual is None:
+
+        tela_atendimento = WebDriverWait(navegador, 30).until(
+
+            
+        )
 
 
 
