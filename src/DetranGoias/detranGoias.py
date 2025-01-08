@@ -70,7 +70,7 @@ pasta_downloads = r"M:\SEMINOVOS\ROBO_SEMINOVOS\EMISSAO IPVA-LIC GO"
 
 load_dotenv()
 
-caminho_planilha = r"C:\Users\Robo01\Desktop\ENTRADA\LOCALIZA FINAL 3 - 4 07-01.xlsx"
+caminho_planilha = r"C:\Users\Robo01\Desktop\ENTRADA\PESQUISA GO 5 AO 0.xlsx"
 
 pasta_saida = criar_pasta_saida(caminho_planilha, pasta_downloads)
 
@@ -364,3 +364,4 @@ for arquivos in arquivos_pdfs:
             else:
                 print(f"Placa {placa} não encontrada na planilha.")
     
+print("Pesquisa Finalizada!")

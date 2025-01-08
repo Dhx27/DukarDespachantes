@@ -16,6 +16,8 @@ resultados_lista = []
 
 for pdf in lista_pdf:
 
+    nome_salva_pdf = pdf.replace(".pdf", "")
+
     caminho_pdf = os.path.join(caminho_entrada, pdf)
 
     # Caminho para o arquivo de erros
@@ -97,35 +99,27 @@ for pdf in lista_pdf:
                     arquivo_erros.write(f"Erro na página {i + 1} \n")
                 print(f"Erro na página {i + 1}. Detalhes registrados em: {caminho_erros}")
 
-#Criar um novo excel
 
+    # Criar um novo arquivo Excel
+    excel = Workbook()
+    instanciaExcel = excel.active
+    instanciaExcel.title = 'Dados'
 
-# Criar um novo arquivo Excel
-excel = Workbook()
-instanciaExcel = excel.active
-instanciaExcel.title = 'Dados'
+    # Cabeçalhos
+    instanciaExcel['A1'] = 'PLACA'
+    instanciaExcel['B1'] = 'AUTO'
+    instanciaExcel['C1'] = 'VALOR'
 
-# Cabeçalhos
-instanciaExcel['A1'] = 'PLACA'
-instanciaExcel['B1'] = 'AUTO'
-instanciaExcel['C1'] = 'VALOR'
+    for resultado in resultados_lista:
+        instanciaExcel.append([
+            resultado['placa'],
+            resultado['auto'],
+            resultado['valor']
+        ])
 
-for resultado in resultados_lista:
-    instanciaExcel.append([
-        resultado['placa'],
-        resultado['auto'],
-        resultado['valor']
-    ])
+    # Criar o nome do arquivo Excel
+    nome_excel = os.path.join(caminho_entrada, f"{nome_salva_pdf}.xlsx")
 
-# Obter a data e hora atual
-data_hora_atual = datetime.now()
-
-# Formatar a data e hora para uso no nome do arquivo
-data_hora_formatada = data_hora_atual.strftime("%Y-%m-%d_%H-%M-%S")
-
-# Criar o nome do arquivo Excel
-nome_excel = os.path.join(caminho_entrada, f"arquivo_{data_hora_formatada}.xlsx")
-
-excel.save(nome_excel )
+    excel.save(nome_excel )
 
 print("Processo concluído!")

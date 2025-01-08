@@ -137,7 +137,7 @@ while index < len(linhas):
 
         tela_atendimento = WebDriverWait(navegador, 30).until(
 
-            
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "asd"))
         )
 
 
