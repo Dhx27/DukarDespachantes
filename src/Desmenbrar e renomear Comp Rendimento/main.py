@@ -2,6 +2,8 @@ import pdfplumber
 from PyPDF2 import PdfReader, PdfWriter
 import re
 import os
+from openpyxl import Workbook
+from datetime import datetime
 
 caminho_entrada = r'C:\Users\diogo.lana\Desktop\TESTE'
 
@@ -29,8 +31,6 @@ for pdf in lista_pdf:
             try:
                 # Extrai o texto da página atual
                 texto_pdf = pagina.extract_text()
-
-                print(texto_pdf)
 
                 # Divide o texto para extrair o número do auto
                 corte_auto_1 = re.split(" / ", texto_pdf)
@@ -99,4 +99,33 @@ for pdf in lista_pdf:
 
 #Criar um novo excel
 
-    print("Processo concluído!")
+
+# Criar um novo arquivo Excel
+excel = Workbook()
+instanciaExcel = excel.active
+instanciaExcel.title = 'Dados'
+
+# Cabeçalhos
+instanciaExcel['A1'] = 'PLACA'
+instanciaExcel['B1'] = 'AUTO'
+instanciaExcel['C1'] = 'VALOR'
+
+for resultado in resultados_lista:
+    instanciaExcel.append([
+        resultado['placa'],
+        resultado['auto'],
+        resultado['valor']
+    ])
+
+# Obter a data e hora atual
+data_hora_atual = datetime.now()
+
+# Formatar a data e hora para uso no nome do arquivo
+data_hora_formatada = data_hora_atual.strftime("%Y-%m-%d_%H-%M-%S")
+
+# Criar o nome do arquivo Excel
+nome_excel = os.path.join(caminho_entrada, f"arquivo_{data_hora_formatada}.xlsx")
+
+excel.save(nome_excel )
+
+print("Processo concluído!")
