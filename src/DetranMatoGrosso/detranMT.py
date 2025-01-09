@@ -154,9 +154,6 @@ planilha = load_workbook(caminho_planilha)
 #Passa a instacia da planilha BASE
 guia_dados = planilha['BASE']
 
-index = 0
-linhas = list(guia_dados.iter_rows(min_row=2, max_row=guia_dados.max_row))
-
 #                           EMISSÃO LICENCIAMENTO 
 
 navegador.get("https://www.detran.mt.gov.br/")
@@ -177,7 +174,12 @@ tela_cookies = WebDriverWait(navegador, 30).until(
 # Pegar todas as guias abertas
 abas = navegador.window_handles
 
+
+index = 0
+linhas = list(guia_dados.iter_rows(min_row=2, max_row=guia_dados.max_row))
 linhaPlan = 1
+
+'''
 while index < len(linhas):
     linhaPlan += 1
 
@@ -247,7 +249,7 @@ while index < len(linhas):
             modal_licenciamento.click()
             
             botao_download_guia = WebDriverWait(navegador, 60).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/table/tbody/tr/td/div[3]/div/table/tbody/tr/td/form[6]/table/tbody/tr[3]/td/span'))
+                EC.element_to_be_clickable((By.CSS_SELECTOR, '#spanDAR_LicenciamentoExercicio))
             ).click()
             
             selecionar_download_como_pdf_lic(pasta_saida, placa_atual)
@@ -266,6 +268,63 @@ while index < len(linhas):
     else:
         index += 1
         continue
+'''
+
+#                                       EMISSÃO IPVA   
+ 
+navegador.get("https://www.sefaz.mt.gov.br/ipva/emissaoguia/emitir")
+
+
+index = 0
+linhas = list(guia_dados.iter_rows(min_row=2, max_row=guia_dados.max_row))
+linhaPlan = 1
+
+while index < len(linhas):
+    linhaPlan += 1
+
+    row = linhas[index]
     
+    renavam_atual_ipva = row[1].value
+    status_atual_ipva = row[4].value
+    
+    if status_atual_ipva is None:
+        
+        tela_pesquisa_ipva = WebDriverWait(navegador, 60).until(
+            EC.visibility_of_element_located((By.XPATH, '/html/body/center/form/table/tbody/tr[5]/td[2]/input'))
+        )
+        
+        campo_input_renavam = navegador.find_element(By.XPATH, '/html/body/center/form/table/tbody/tr[5]/td[2]/input')
+        campo_input_renavam.clear()
+        campo_input_renavam.send_keys(renavam_atual_ipva)
+        
+        botao_consultar = WebDriverWait(navegador, 60).until(
+            EC.element_to_be_clickable((By.XPATH, '/html/body/center/form/p/input[1]'))
+        ).click()
+        
+        #Aqui pedi captcha
+        
+        navegador.refresh()
+        
+        tela_ipva = WebDriverWait(navegador, 60).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "table.SEFAZ-TABLE-Moldura"))
+        )
+        
+        elemento_desconto5 = WebDriverWait(navegador, 60).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "#tipoGuia\.2025\.2"))
+        ).click()
+        
+        botao_gerar_guias = WebDriverWait(navegador, 60).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "#btnOK"))
+        ).click()
+        
+        navegador.refresh()
+        
+        
+    else:
+        
+        index += 1 
+        continue
+    
+
 
 navegador.quit()
