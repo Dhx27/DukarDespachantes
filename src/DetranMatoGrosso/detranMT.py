@@ -1,4 +1,4 @@
-#ROBO DE EMISSÃO DE IPVA E LICENCIAMENTO
+#ROBO DE EMISSÃO DE LICENCIAMENTO E IPVA
 
 from dotenv import load_dotenv
 from openpyxl import load_workbook
@@ -17,16 +17,58 @@ import os
 import pyautogui
 import pdfplumber
 import re
+import pyautogui
 
 load_dotenv()
 
-pasta_download = r'C:\Users\diogo.lana\Desktop\TESTE'
-caminho_planilha = r'C:\Users\diogo.lana\Desktop\TESTE\MODELO MT.xlsx'
+pasta_download = r'C:\Users\Diogo Lana\Desktop\Nova pasta'
+caminho_planilha = r'C:\Users\Diogo Lana\Desktop\Nova pasta\MODELO MT.xlsx'
 
 # Dados do Turnstile CAPTCHA
 API_KEY = os.getenv("api_key")
 SITEKEY = "0x4AAAAAAAO9omZCUc8pnQfN"
 PAGE_URL = "https://internet.detrannet.mt.gov.br/ConsultaVeiculo.asp"
+
+
+def selecionar_download_como_pdf_lic(pasta_saida, placa_atual):
+    
+    time.sleep(5)
+    
+    pyautogui.hotkey('ctrl', 'p')
+    time.sleep(3)
+    
+    # Navegar pelas opções até "Salvar"
+    for _ in range(5):  # Pressiona 'tab' 5 vezes
+        pyautogui.hotkey('tab')
+    time.sleep(1.5)
+
+    pyautogui.write("salvar")  # Digita "salvar"
+    time.sleep(1.5)
+
+        # Navegar até o botão de salvar
+    for _ in range(4):  # Pressiona 'tab' 6 vezes
+        pyautogui.hotkey('tab')
+    time.sleep(1.5)
+
+    pyautogui.hotkey('enter')  # Confirma "Salvar"
+    time.sleep(3)
+
+    # Define o caminho completo para salvar o arquivo
+    caminho_download = os.path.join(pasta_saida, f"LIC {placa_atual}")
+    caminho_download = os.path.normpath(caminho_download)  # Normaliza o caminho
+
+    # Digitar o caminho de salvamento
+    pyautogui.write(caminho_download)
+    time.sleep(1)
+    pyautogui.hotkey('enter')  # Confirma o caminho
+
+    print("Arquivo salvo com sucesso!")
+    time.sleep(1)
+    pyautogui.hotkey('ctrl', 'w')
+    time.sleep(1.5)
+    pyautogui.hotkey('ctrl', 'w')
+    
+    
 
 # 1. Enviar requisição para resolver o CAPTCHA
 def enviar_requisicao_captcha(api_key, sitekey, page_url):
@@ -61,15 +103,17 @@ def obter_resposta_captcha(api_key, captcha_id):
 def inserir_token(navegador, token):
     try:
 
-        navegador.execute_script(
-            "document.getElementById('g-recaptcha-response').style.display = 'block';"
+        elemento = WebDriverWait(navegador, 30).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@name='g-recaptcha-response']"))
         )
-        navegador.execute_script(
-            f"document.getElementById('g-recaptcha-response').innerHTML = '{token}';"
-        )
-        navegador.execute_script(
-            "document.getElementsByName('g-recaptcha-response')[0].dispatchEvent(new Event('change'));")
-        print("Token inserido com sucesso!")
+        
+        valor_captcha = f"{token}"
+        navegador.execute_script(f"arguments[0].setAttribute('value', '{valor_captcha}')", elemento)
+
+        # Disparar o evento de mudança (opcional)
+        #navegador.execute_script("arguments[0].dispatchEvent(new Event('change'))", elemento)
+
+
 
     except Exception as e:
         raise Exception(f"Erro ao inserir token: {str(e)}")
@@ -110,16 +154,28 @@ planilha = load_workbook(caminho_planilha)
 #Passa a instacia da planilha BASE
 guia_dados = planilha['BASE']
 
-guia_dados ['A1'] = "PLACA"
-guia_dados ['B1'] = "RENAVAM"
-guia_dados ['C1'] = "CNPJ"
-guia_dados ['D1'] = "STATUS SITE"
-
 index = 0
 linhas = list(guia_dados.iter_rows(min_row=2, max_row=guia_dados.max_row))
 
+#                           EMISSÃO LICENCIAMENTO 
+
 navegador.get("https://www.detran.mt.gov.br/")
 
+tela_atendimento = WebDriverWait(navegador, 100).until(
+
+    EC.visibility_of_element_located((By.CSS_SELECTOR, "#myPopup > a > picture > img"))
+)
+        
+botao_fechar = navegador.find_element(By.CSS_SELECTOR, "#myPopup > span")
+navegador.execute_script("arguments[0].click();", botao_fechar)
+        
+tela_cookies = WebDriverWait(navegador, 30).until(
+    EC.element_to_be_clickable((By.XPATH, '//*[@id="adopt-accept-all-button"]'))
+).click()
+        
+
+# Pegar todas as guias abertas
+abas = navegador.window_handles
 
 linhaPlan = 1
 while index < len(linhas):
@@ -131,16 +187,85 @@ while index < len(linhas):
     placa_atual = row[0].value
     renavam_atual = row[1].value
     cnpj_atual = row[2].value
-    status_atual = row[3].value
+    status_lic = row[3].value
 
-    if status_atual is None:
-
-        tela_atendimento = WebDriverWait(navegador, 30).until(
-
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "asd"))
+    if status_lic is None:
+        
+        campo_placa_renavam = WebDriverWait(navegador, 100).until(
+            EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div[4]/section/div/div/div/div/div[1]/section/div/div/div/div/div/div[2]/div/div/section/div/div[2]/div/div/div/div/div'))
+        )
+        
+        campo_placa = navegador.find_element(By.CSS_SELECTOR, "#input_placa")
+        campo_placa.clear()
+        campo_placa.send_keys(placa_atual)
+        
+        time.sleep(1.5)
+        
+        campo_renavam = navegador.find_element(By.CSS_SELECTOR, "#input_renavam")
+        campo_renavam.clear()
+        campo_renavam.send_keys(renavam_atual)
+        
+        botao_consultar = WebDriverWait(navegador, 30).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "#formVeiculo > div:nth-child(4) > input.dtrn-frm-sub.dtrn-vin.text-size-acessibilidade"))
+        ).click()
+        
+        # Pegar todas as guias abertas
+        abas = navegador.window_handles
+        
+        # Alternar para a nova guia (última aberta)
+        navegador.switch_to.window(abas[-1])
+        print("Estamos na nova guia:", navegador.title)
+        
+        tela_cnpj = WebDriverWait(navegador, 60).until(
+            EC.visibility_of_element_located((By.XPATH, '/html/body/center/div/form/table/tbody/tr[3]/td[2]/input'))
         )
 
-
-
+        time.sleep(5)
+        
+        try:
+            print("Enviando requisição para resolver o CAPTCHA...")
+            captcha_id = enviar_requisicao_captcha(API_KEY, SITEKEY, PAGE_URL)
+            print("Obtendo resposta do CAPTCHA...")
+            token = obter_resposta_captcha(API_KEY, captcha_id)
+            print("Solução do CAPTCHA obtida:")
+            inserir_token(navegador, token)  # Descomente ao integrar com Selenium
+            
+            cnpj = cnpj_atual.replace(".", "").replace("/", "").replace("-", "")
+            
+            campo_cnpj = navegador.find_element(By.XPATH, '/html/body/center/div/form/table/tbody/tr[3]/td[2]/input')
+            campo_cnpj.send_keys(cnpj)
+            
+            botao_consultar_veiculo = WebDriverWait(navegador, 60).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/center/div/form/table/tbody/tr[4]/td/input'))
+            ).click()
+            
+            tela_baixar_boleto = WebDriverWait(navegador, 60).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "#td_meio_Integral"))
+            )
+            
+            modal_licenciamento = navegador.find_element(By.CSS_SELECTOR, "#cmbTipoDebito")
+            modal_licenciamento.click()
+            
+            botao_download_guia = WebDriverWait(navegador, 60).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/table/tbody/tr/td/div[3]/div/table/tbody/tr/td/form[6]/table/tbody/tr[3]/td/span'))
+            ).click()
+            
+            selecionar_download_como_pdf_lic(pasta_saida, placa_atual)
+            
+            guia_dados[f'D{linhaPlan}'] = "OK!"  
+            planilha.save(caminho_planilha)
+            
+            # Voltar para a guia original
+            navegador.switch_to.window(abas[0])
+            print("Voltamos para a guia original:", navegador.title)
+            
+            index += 1
+            
+        except Exception as e:
+            print(f"Erro: {str(e)}")
+    else:
+        index += 1
+        continue
+    
 
 navegador.quit()
