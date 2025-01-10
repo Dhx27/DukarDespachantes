@@ -18,6 +18,7 @@ import pyautogui
 import pdfplumber
 import re
 import pyautogui
+import base64
 
 load_dotenv()
 
@@ -29,6 +30,38 @@ API_KEY = os.getenv("api_key")
 SITEKEY = "0x4AAAAAAAO9omZCUc8pnQfN"
 PAGE_URL = "https://internet.detrannet.mt.gov.br/ConsultaVeiculo.asp"
 
+def selecionar_download_como_pdf_ipva(pasta_saida, placa_atual_ipva):
+    time.sleep(5)
+    
+    pyautogui.hotkey('ctrl', 'p')
+    time.sleep(3)
+    
+    # Navegar pelas opções até "Salvar"
+    for _ in range(5):  # Pressiona 'tab' 5 vezes
+        pyautogui.hotkey('tab')
+    time.sleep(1.5)
+
+    pyautogui.write("salvar")  # Digita "salvar"
+    time.sleep(1.5)
+
+    # Navegar até o botão de salvar
+    for _ in range(3):  
+        pyautogui.hotkey('tab')
+    time.sleep(1.5)
+
+    pyautogui.hotkey('enter')  # Confirma "Salvar"
+    time.sleep(3)
+
+    # Define o caminho completo para salvar o arquivo
+    caminho_download = os.path.join(pasta_saida, f"IPVA {placa_atual_ipva}")
+    caminho_download = os.path.normpath(caminho_download)  # Normaliza o caminho
+
+    # Digitar o caminho de salvamento
+    pyautogui.write(caminho_download)
+    time.sleep(1)
+    pyautogui.hotkey('enter')  # Confirma o caminho
+
+    print("Arquivo salvo com sucesso!")
 
 def selecionar_download_como_pdf_lic(pasta_saida, placa_atual):
     
@@ -67,10 +100,44 @@ def selecionar_download_como_pdf_lic(pasta_saida, placa_atual):
     pyautogui.hotkey('ctrl', 'w')
     time.sleep(1.5)
     pyautogui.hotkey('ctrl', 'w')
+
+#Enviar requisição para resolver o captchaa
+def enviar_requisicao_captcha_1(api_key, base64_image):
     
+    url = "http://2captcha.com/in.php"
+    data = {
+        
+        "key": api_key,
+        "method": "base64",
+        "body": base64_image,
+        "json": 1,
+    }
+
+    response = requests.post(url, data=data)   
+    if response.status_code == 200 and "OK|" in response.text:
+        captcha_id = response.text.split('|')[1]
+        return captcha_id
+    else:
+        raise Exception(f"Erro ao enviar captcha: {response.text}")
+    
+# 2. Obter o token de resposta do CAPTCHA
+def obter_resposta_captcha_1(api_key, captcha_id):
+    
+    url = f"http://2captcha.com/res.php?key={api_key}&action=get&id={captcha_id}&json=1"
+    while True:
+        
+        response = requests.get(url).json()
+        if response["status"] == 1:
+            return response["request"]
+        elif response["request"] == "CAPCHA_NOT_READY":
+            print("Captcha ainda não resolvido, aguardando...")
+        else:
+            raise Exception(f"Erro ao obter resposta: {response}")
+        time.sleep(5)
     
 
-# 1. Enviar requisição para resolver o CAPTCHA
+
+# 1. Enviar requisição para resolver o CAPTCHA turnstile
 def enviar_requisicao_captcha(api_key, sitekey, page_url):
     url = "http://2captcha.com/in.php"
     data = {
@@ -112,8 +179,6 @@ def inserir_token(navegador, token):
 
         # Disparar o evento de mudança (opcional)
         #navegador.execute_script("arguments[0].dispatchEvent(new Event('change'))", elemento)
-
-
 
     except Exception as e:
         raise Exception(f"Erro ao inserir token: {str(e)}")
@@ -179,7 +244,7 @@ index = 0
 linhas = list(guia_dados.iter_rows(min_row=2, max_row=guia_dados.max_row))
 linhaPlan = 1
 
-'''
+
 while index < len(linhas):
     linhaPlan += 1
 
@@ -249,7 +314,7 @@ while index < len(linhas):
             modal_licenciamento.click()
             
             botao_download_guia = WebDriverWait(navegador, 60).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, '#spanDAR_LicenciamentoExercicio))
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "#spanDAR_LicenciamentoExercicio"))
             ).click()
             
             selecionar_download_como_pdf_lic(pasta_saida, placa_atual)
@@ -268,7 +333,7 @@ while index < len(linhas):
     else:
         index += 1
         continue
-'''
+
 
 #                                       EMISSÃO IPVA   
  
@@ -284,6 +349,7 @@ while index < len(linhas):
 
     row = linhas[index]
     
+    placa_atual_ipva = row[0].value
     renavam_atual_ipva = row[1].value
     status_atual_ipva = row[4].value
     
@@ -303,7 +369,7 @@ while index < len(linhas):
         
         #Aqui pedi captcha
         
-        navegador.refresh()
+        #navegador.refresh()
         
         tela_ipva = WebDriverWait(navegador, 60).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, "table.SEFAZ-TABLE-Moldura"))
@@ -317,8 +383,36 @@ while index < len(linhas):
             EC.element_to_be_clickable((By.CSS_SELECTOR, "#btnOK"))
         ).click()
         
-        navegador.refresh()
+        try:
+            imagem_captcha = WebDriverWait(navegador,10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "body > div > p:nth-child(2) > img:nth-child(1)"))
+            )
+            
+            # URL em formato base64
+            base64_url = imagem_captcha.get_attribute("src")
+
+            # Remover o prefixo 'data:image/png;base64,' e decodificar
+            base64_data = base64_url.split(",")[1]
+            image_data = base64.b64decode(base64_data)
+            
+            #Salvar a imagem como um arquivo local
+            with open("captcha.png", "wb") as file:
+                file.write(image_data)
+
+            print("Imagem do CAPTCHA salva como 'captcha.png'")
+            
+            # Abrir o arquivo da imagem
+            with open("captcha.png", "rb") as image_file:
+                base64_image = base64.b64encode(image_file.read()).decode("utf-8")
         
+        except (TimeoutException, NoSuchElementException):
+            pass
+        
+        time.sleep(5)
+        
+        selecionar_download_como_pdf_ipva(pasta_saida, placa_atual_ipva)
+        
+        navegador.get("https://www.sefaz.mt.gov.br/ipva/emissaoguia/emitir")            
         
     else:
         
