@@ -70,7 +70,7 @@ pasta_downloads = r"M:\SEMINOVOS\ROBO_SEMINOVOS\EMISSAO IPVA-LIC GO"
 
 load_dotenv()
 
-caminho_planilha = r"C:\Users\Robo01\Desktop\ENTRADA\PESQUISA GO 5 AO 0.xlsx"
+caminho_planilha = r"C:\Users\Robo01\Desktop\ENTRADA\10-01 PESQUISA GO 5 AO 9.xlsx"
 
 pasta_saida = criar_pasta_saida(caminho_planilha, pasta_downloads)
 
@@ -79,11 +79,6 @@ planilha = load_workbook(caminho_planilha)
 
 #Passa a instacia da planilha BASE
 guia_dados = planilha['BASE']
-
-#Passa os cabeçalhos
-guia_dados['A1'] = "PLACA"
-guia_dados['B1'] = "RENAVAM"
-guia_dados['D1'] = "STATUS SITE"
 
 index = 0
 linhas = list(guia_dados.iter_rows(min_row=2 , max_row= guia_dados.max_row))
@@ -130,7 +125,7 @@ try:
     botaoEntrar = navegador.find_element(By.CSS_SELECTOR, "#submit-button")
     botaoEntrar.click()
 
-    telaInicial = WebDriverWait(navegador, 60).until(
+    telaInicial = WebDriverWait(navegador, 1000).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "exui-titulo-servico"))
     )
     
@@ -161,7 +156,7 @@ try:
 
         if status_atual is None:
 
-            time.sleep(5)
+            time.sleep(2)
 
             tela_pesquisa = WebDriverWait(navegador, 60).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "exui-card-formulario-status > mat-card"))
@@ -238,6 +233,8 @@ try:
                     
                     botao_confirmar = navegador.find_element(By.CSS_SELECTOR, "body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.exui-fill-button.swal2-styled")
                     botao_confirmar.click()
+
+                    time.sleep(3)
                     
                     tela_forma_pagamento = WebDriverWait(navegador, 60).until(
                         EC.visibility_of_element_located((By.XPATH, "/html/body/app-root/app-raiz-servicos-digitais/body/div/div/div/div/div/lib-detalhes-veiculo/div/exui-abas/div/div/exui-aba[2]/div/lib-debitos-veiculo/lib-modal-forma-de-pagamento/exui-modal-item/div/div/div[2]"))
@@ -300,6 +297,8 @@ except TimeoutException:
     breakpoint()
     
 navegador.quit()
+
+
 
 #TRATATIVA BOLETOS
 

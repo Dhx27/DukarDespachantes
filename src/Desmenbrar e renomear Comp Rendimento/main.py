@@ -5,11 +5,11 @@ import os
 from openpyxl import Workbook
 from datetime import datetime
 
-caminho_entrada = r'C:\Users\diogo.lana\Desktop\TESTE'
+caminho_entrada = r'C:\Users\Diogo Lana\Desktop\Nova pasta'
 
 lista_pdf = [f for f in os.listdir(caminho_entrada) if f.endswith('.pdf')]
 
-pasta_desmebrados = r'M:\FINANCEIRO\ROBO\COMPROVANTES RENDIMENTO'
+pasta_desmebrados = r'C:\Users\Diogo Lana\Desktop\Nova pasta\RENOMEADOS'
 
 #instancia a lista dos resultados dos boletos
 resultados_lista = []
@@ -33,11 +33,24 @@ for pdf in lista_pdf:
             try:
                 # Extrai o texto da página atual
                 texto_pdf = pagina.extract_text()
-
+                
                 # Divide o texto para extrair o número do auto
                 corte_auto_1 = re.split(" / ", texto_pdf)
-                corte_auto_2 = re.split(" ", corte_auto_1[1])
-                auto = corte_auto_2[0]
+                regex_data = r'\b\d{2}/\d{2}/\d{4}\b'
+                data_lista = re.findall(regex_data, corte_auto_1[1])
+                data_corte = data_lista[0]
+                corte_auto_2 = re.split(data_corte, corte_auto_1[1])
+                auto = corte_auto_2[0].replace(" ", "")
+                
+                if auto == '':
+                    tratamento_auto_1 = re.split("\nTOTAL",corte_auto_1[1])
+                    tratamento_auto_2 = re.split(" ", tratamento_auto_1[0])
+                    auto = tratamento_auto_2.pop()
+                    
+                    
+                if "/" in auto:
+                    auto = re.split("/", auto)
+                    auto = auto[0]
 
                 # Divide o texto para extrair a placa
                 corte_placa_1 = re.split("Placa: ", texto_pdf)
@@ -72,6 +85,8 @@ for pdf in lista_pdf:
                 # Caminho completo do arquivo de saída
                 caminho_pdf_saida = os.path.join(pasta_desmebrados, nome_pdf)
 
+                if auto is None:
+                    breakpoint
                 # Armazenando os resultados de cada extração
                 resultados_lista.append({
 
@@ -121,5 +136,7 @@ for pdf in lista_pdf:
     nome_excel = os.path.join(caminho_entrada, f"{nome_salva_pdf}.xlsx")
 
     excel.save(nome_excel )
+    
+    resultados_lista.clear()
 
 print("Processo concluído!")
