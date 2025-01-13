@@ -532,11 +532,6 @@ arquivos_pdfs = [f for f in os.listdir(pasta_saida) if f.endswith('.pdf')]
 
 for arquivos in arquivos_pdfs:
     
-    propietario =""
-    valor_licenciamento =""
-    valor_ipva =""
-    placa=""
-    
     caminho_pdf = os.path.join(pasta_saida, arquivos)
     
     with pdfplumber.open(caminho_pdf) as pdf:
@@ -571,17 +566,24 @@ for arquivos in arquivos_pdfs:
                 corte_valor_ipva_2 = re.split("4. Confira as informações", corte_valor_ipva_1[1])
                 valor_ipva = corte_valor_ipva_2[0].replace("\n", "")
                 
-                propietario = ""
-                valor_licenciamento = ""
+                # Procurar a placa na planilha e preencher dados
+                for linha in range(2, guia_dados.max_row + 1):
+                    celula_placa = guia_dados[f'A{linha}'].value  # Coluna 'A' contém as placas
+                    if celula_placa == placa: 
+                        guia_dados[f'F{linha}'] = valor_ipva  # Coluna 'E': VALOR IPVA
+                        planilha.save(caminho_planilha)
+                        break
+                    else:
+                        print(f"Placa {placa} não encontrada na planilha.")
+                
+                continue
            
             # Procurar a placa na planilha e preencher dados
             for linha in range(2, guia_dados.max_row + 1):
                 celula_placa = guia_dados[f'A{linha}'].value  # Coluna 'A' contém as placas
                 if celula_placa == placa:  # Verificar se a placa da planilha corresponde à do boleto
-                    
                     guia_dados[f'I{linha}'] = propietario  # Coluna 'B': PROPRIETARIO
                     guia_dados[f'G{linha}'] = valor_licenciamento  # Coluna 'D': VALOR LIC
-                    guia_dados[f'F{linha}'] = valor_ipva  # Coluna 'E': VALOR IPVA
                     guia_dados[f'J{linha}'] = "BOLETO PROCESSADO"  # Coluna 'F': STATUS BOLETO
                     print(f"Dados preenchidos para a placa {placa} na linha {linha}.")
                      # Salvar a planilha
