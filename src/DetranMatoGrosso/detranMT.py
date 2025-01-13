@@ -22,8 +22,8 @@ import base64
 
 load_dotenv()
 
-pasta_download = r'C:\Users\Diogo Lana\Desktop\Nova pasta'
-caminho_planilha = r'C:\Users\Diogo Lana\Desktop\Nova pasta\MODELO MT.xlsx'
+pasta_download = r'C:\Users\diogo.lana\Desktop\TESTE\MODELO MT'
+caminho_planilha = r'C:\Users\diogo.lana\Desktop\TESTE\MODELO MT.xlsx'
 
 # Dados do Turnstile CAPTCHA
 API_KEY = os.getenv("api_key")
@@ -276,6 +276,26 @@ try:
                 botao_consultar_veiculo = WebDriverWait(navegador, 60).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/center/div/form/table/tbody/tr[4]/td/input'))
                 ).click()
+
+                try:
+
+                    campo_placa_renavam_nao_comferem = WebDriverWait(navegador, 10).until(
+                        EC.visibility_of_element_located((By.CSS_SELECTOR, "body > center > div > table > tbody > tr > td"))
+                    )
+
+                    guia_dados[f'D{linhaPlan}'] = "Placa e renavam não conferem"
+                    planilha.save(caminho_planilha)
+                    index += 1
+                    
+                    navegador.close()
+                    
+                    # Voltar para a guia original
+                    navegador.switch_to.window(abas[0])
+                    print("Voltamos para a guia original:", navegador.title)
+                    continue
+
+                except (NoSuchElementException, TimeoutException):
+                    pass
                 
                 tela_baixar_boleto = WebDriverWait(navegador, 60).until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, "#exibir_servicos_Debitos"))
