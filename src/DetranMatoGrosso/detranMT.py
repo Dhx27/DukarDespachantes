@@ -19,11 +19,13 @@ import pdfplumber
 import re
 import pyautogui
 import base64
+import pdfplumber
+import re
 
 load_dotenv()
 
-pasta_download = r'C:\Users\diogo.lana\Desktop\TESTE\MODELO MT'
-caminho_planilha = r'C:\Users\diogo.lana\Desktop\TESTE\MODELO MT.xlsx'
+pasta_download = r'C:\Users\Diogo Lana\Desktop\Nova pasta'
+caminho_planilha = r'C:\Users\Diogo Lana\Desktop\Nova pasta\MODELO MT.xlsx'
 
 # Dados do Turnstile CAPTCHA
 API_KEY = os.getenv("api_key")
@@ -168,6 +170,7 @@ def criar_pasta_saida(pasta_download, caminho_planilha):
 
     return pasta_saida
 
+'''
 # Configurar o Chrome com um User-Agent falso usando undetected-chromedriver
 chrome_options = Options()
 chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
@@ -175,7 +178,7 @@ chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64
 # Inicializa o navegador com as opções e com o stealth mode ativado
 navegador = uc.Chrome(options=chrome_options)
 navegador.maximize_window()
-
+'''
 pasta_saida = criar_pasta_saida(pasta_download, caminho_planilha)
 
 #Abri a planilha do excel
@@ -184,6 +187,7 @@ planilha = load_workbook(caminho_planilha)
 #Passa a instacia da planilha BASE
 guia_dados = planilha['BASE']
 
+"""
 #                           EMISSÃO LICENCIAMENTO 
 
 navegador.get("https://www.detran.mt.gov.br/")
@@ -228,6 +232,8 @@ try:
         status_lic = row[3].value
 
         if status_lic is None:
+        
+            time.sleep(3)
             
             campo_placa_renavam = WebDriverWait(navegador, 100).until(
                 EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div[4]/section/div/div/div/div/div[1]/section/div/div/div/div/div/div[2]/div/div/section/div/div[2]/div/div/div/div/div'))
@@ -282,6 +288,14 @@ try:
                     campo_placa_renavam_nao_comferem = WebDriverWait(navegador, 10).until(
                         EC.visibility_of_element_located((By.CSS_SELECTOR, "body > center > div > table > tbody > tr > td"))
                     )
+                    
+                    elemento_placa_renavam_nao_comferem = campo_placa_renavam_nao_comferem.text
+
+                    if "Documento Proprietario informado não confere com o proprietario do veiculo" in elemento_placa_renavam_nao_comferem:
+                        guia_dados[f'D{linhaPlan}'] = "Documento Proprietario informado não confere com o proprietario do veiculo."
+
+                    if "Placa e renavam não conferem" in elemento_placa_renavam_nao_comferem:
+                        guia_dados[f'D{linhaPlan}'] = "Placa e renavam não conferem"
 
                     guia_dados[f'D{linhaPlan}'] = "Placa e renavam não conferem"
                     planilha.save(caminho_planilha)
@@ -511,3 +525,85 @@ except TimeoutException:
     breakpoint()
 
 navegador.quit()
+"""
+#                       MANIPULAÇÃO DE PDFS
+
+arquivos_pdfs = [f for f in os.listdir(pasta_saida) if f.endswith('.pdf')]
+
+for arquivos in arquivos_pdfs:
+    
+    propietario =""
+    valor_licenciamento =""
+    valor_ipva =""
+    placa=""
+    
+    caminho_pdf = os.path.join(pasta_saida, arquivos)
+    
+    with pdfplumber.open(caminho_pdf) as pdf:
+        for num_page, pagina in enumerate(pdf.pages):
+            
+            texto_boleto = pagina.extract_text()
+            
+            if "Licenciamento" in texto_boleto:
+                
+                #Extrai a placa do boleto 
+                corte_placa_1 = re.split("Placa:", texto_boleto)
+                corte_placa_2 = re.split(" / ", corte_placa_1[1])
+                placa = corte_placa_2 [0]
+                
+                #Extrai valor do licenciamento do boleto
+                corte_valor_licenciamento_1 = re.split("TOTAL A RECOLHER 31 - VALOR", texto_boleto)
+                corte_valor_licenciamento_2 = re.split("33 - VALOR A RECOLHER POR EXTENSO", corte_valor_licenciamento_1[1])
+                valor_licenciamento = corte_valor_licenciamento_2[0].replace("\n", "")
+                
+                corte_propietario_1 = re.split("CNPJ OU CPF SELO FISCAL NA SAÍDA", texto_boleto)
+                corte_propietario_2 = re.split("PARA OUTRA U.F.", corte_propietario_1[1])
+                propietario = corte_propietario_2[0].replace("\n", "")
+            
+            if "IPVA" in texto_boleto:
+                
+                #Extrai a placa do boleto 
+                corte_placa_1 = re.split("Placa : ", texto_boleto)
+                corte_placa_2 = re.split("JUROS 29 - VALOR", corte_placa_1[1])
+                placa = corte_placa_2 [0].replace(" ", "")
+                
+                corte_valor_ipva_1 = re.split("3. Escaneie o código abaixo ", texto_boleto)
+                corte_valor_ipva_2 = re.split("4. Confira as informações", corte_valor_ipva_1[1])
+                valor_ipva = corte_valor_ipva_2[0].replace("\n", "")
+                
+                propietario = ""
+                valor_licenciamento = ""
+           
+            # Procurar a placa na planilha e preencher dados
+            for linha in range(2, guia_dados.max_row + 1):
+                celula_placa = guia_dados[f'A{linha}'].value  # Coluna 'A' contém as placas
+                if celula_placa == placa:  # Verificar se a placa da planilha corresponde à do boleto
+                    
+                    guia_dados[f'I{linha}'] = propietario  # Coluna 'B': PROPRIETARIO
+                    guia_dados[f'G{linha}'] = valor_licenciamento  # Coluna 'D': VALOR LIC
+                    guia_dados[f'F{linha}'] = valor_ipva  # Coluna 'E': VALOR IPVA
+                    guia_dados[f'J{linha}'] = "BOLETO PROCESSADO"  # Coluna 'F': STATUS BOLETO
+                    print(f"Dados preenchidos para a placa {placa} na linha {linha}.")
+                     # Salvar a planilha
+                    planilha.save(caminho_planilha)
+                    break
+            else:
+                print(f"Placa {placa} não encontrada na planilha.")
+
+for linha in range (2, guia_dados.max_row + 1):
+    
+    celula_ipva = guia_dados[f'F{linha}'].value
+    celula_licenciamento = guia_dados[f'G{linha}'].value
+    
+    # Verifica se algum dos valores é None ou está vazio
+    if not celula_ipva or not celula_licenciamento:
+        continue  # Pula para a próxima iteração se qualquer valor estiver vazio
+    
+    valor_ipva_calc = float(celula_ipva.replace('.', '').replace(',', '.'))
+    valor_licenciamento_cal = float(celula_licenciamento.replace('.', '').replace(',', '.'))
+    
+    valor_total = valor_ipva_calc + valor_licenciamento_cal
+    
+    guia_dados[f'H{linha}'] = valor_total  # Coluna 'H': VALOR 
+    planilha.save(caminho_planilha)
+    
