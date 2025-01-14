@@ -170,7 +170,7 @@ def criar_pasta_saida(pasta_download, caminho_planilha):
 
     return pasta_saida
 
-'''
+
 # Configurar o Chrome com um User-Agent falso usando undetected-chromedriver
 chrome_options = Options()
 chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
@@ -178,7 +178,7 @@ chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64
 # Inicializa o navegador com as opções e com o stealth mode ativado
 navegador = uc.Chrome(options=chrome_options)
 navegador.maximize_window()
-'''
+
 pasta_saida = criar_pasta_saida(pasta_download, caminho_planilha)
 
 #Abri a planilha do excel
@@ -187,7 +187,7 @@ planilha = load_workbook(caminho_planilha)
 #Passa a instacia da planilha BASE
 guia_dados = planilha['BASE']
 
-"""
+
 #                           EMISSÃO LICENCIAMENTO 
 
 navegador.get("https://www.detran.mt.gov.br/")
@@ -475,6 +475,27 @@ try:
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "table.SEFAZ-TABLE-Moldura"))
             )
             
+            try:
+                
+                veiculo_nao_contem_debitos = WebDriverWait(navegador, 10).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "body > center > form > div > p"))
+                )
+                
+                texto_veiculo_sem_debios = veiculo_nao_contem_debitos.text
+                
+                if texto_veiculo_sem_debios == "Nenhum débito foi localizado para o veículo acima informado!":
+                    
+                    guia_dados[f'E{linhaPlan}'] = "Nenhum débito foi localizado para o veículo acima informado"  
+                    planilha.save(caminho_planilha)
+            
+                    index +=1
+                    navegador.get("https://www.sefaz.mt.gov.br/ipva/emissaoguia/emitir") 
+            
+                    quebra_captcha()  
+                    
+            except (TimeoutException, NoSuchElementException):
+                pass
+            
             elemento_desconto5 = WebDriverWait(navegador, 60).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "#tipoGuia\.2025\.2"))
             ).click()
@@ -525,7 +546,7 @@ except TimeoutException:
     breakpoint()
 
 navegador.quit()
-"""
+
 #                       MANIPULAÇÃO DE PDFS
 
 arquivos_pdfs = [f for f in os.listdir(pasta_saida) if f.endswith('.pdf')]
