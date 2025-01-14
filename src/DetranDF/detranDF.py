@@ -40,8 +40,8 @@ def criar_pasta_saida(pasta_download, caminho_planilha):
     return pasta_saida
 
 # Caminha para selecionar o download como PDF
-def selecionar_download_como_pdf(pasta_saida, placa_atual):
-    
+def selecionar_download_como_pdf(pasta_saida, placa_atual, ano_ipva):
+
     # Navegar pelas opções até "Salvar"
     for _ in range(5):  # Pressiona 'tab' 5 vezes
         pyautogui.hotkey('tab')
@@ -51,7 +51,7 @@ def selecionar_download_como_pdf(pasta_saida, placa_atual):
     time.sleep(1.5)
 
         # Navegar até o botão de salvar
-    for _ in range(3):  # Pressiona 'tab' 6 vezes
+    for _ in range(6):  # Pressiona 'tab' 6 vezes
         pyautogui.hotkey('tab')
     time.sleep(1.5)
 
@@ -59,7 +59,7 @@ def selecionar_download_como_pdf(pasta_saida, placa_atual):
     time.sleep(3)
 
     # Define o caminho completo para salvar o arquivo
-    caminho_download = os.path.join(pasta_saida, f"{placa_atual}")
+    caminho_download = os.path.join(pasta_saida, f"{placa_atual}_{ano_ipva}")
     caminho_download = os.path.normpath(caminho_download)  # Normaliza o caminho
 
     # Digitar o caminho de salvamento
@@ -131,6 +131,12 @@ try:
         EC.visibility_of_element_located((By.CSS_SELECTOR, "app-home > section > div:nth-child(1)"))
     )
 
+    time.sleep(2)
+
+    pyautogui.leftClick(x=1188, y=365)
+
+    time.sleep(1)
+
     cabecalho_veiculos = WebDriverWait(navegador, 60).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "body > app-root > app-header > mat-toolbar > span > span > section > button:nth-child(2)"))
     ).click()
@@ -182,10 +188,55 @@ try:
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "app-lista-dados:nth-child(2) div.forms-wrapper-header.ng-star-inserted > div > span"))
             )
 
+            time.sleep(3)
+
+            tabela_ipva = navegador.find_element(By.CSS_SELECTOR, "div:nth-child(2) > app-lista-dados:nth-child(2) > div > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table")
+            linhas_ipva = tabela_ipva.find_elements(By.TAG_NAME, "tr")
+            numero_linhas_ipva = len(linhas_ipva)
+
+            #                                   EMISSÃO LICENCIAMENTO
+
+            for cont in range(1,  numero_linhas_ipva):
+
+                selector_ano_ipva = f" div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-Ano.mat-column-Ano.ng-star-inserted"
+                selector_botao_emitir = f"div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child({cont}) > td.mat-cell.cdk-cell.cdk-column-A--o.mat-column-A--o.ng-star-inserted > button"
+
+                campo_ano_ipva = navegador.find_element(By.CSS_SELECTOR, selector_ano_ipva)
+                ano_ipva = campo_ano_ipva.text
+
+                botao_emitir = navegador.find_element(By.CSS_SELECTOR, selector_botao_emitir)
+                botao_emitir.click()
+
+                tela_boleto = WebDriverWait(navegador, 60).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "app-invoice > section > div.pagina-bordero"))
+                )
+
+                time.sleep(3)
+                try:
+                    botao_imprimir = navegador.find_element(By.ID, "buttonImprimir")
+                    navegador.execute_script("arguments[0].click();", botao_imprimir)
+                
+                except (NoSuchElementException, TimeoutException): 
+
+                    selecionar_download_como_pdf(pasta_saida, placa_atual, ano_ipva)
+
+                time.sleep(1)
+
+                botao_voltar = WebDriverWait(navegador, 60).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "#footer > mat-card-actions > button"))
+                ).click()
+
+            guia_dados[f"C{linhaPlan}"] = "OK!"
+            index +=1
+
+
+            #                                           EMISSÃO IPVA
+
             
 
-except Exception:
+except Exception as e :
 
+    print(f"Erro {e}")
     print("Renicie a automação")
     breakpoint()
 
