@@ -19,7 +19,6 @@ import pdfplumber
 import re
 import pyautogui
 import base64
-import pdfplumber
 import re
 
 load_dotenv()
@@ -194,15 +193,19 @@ navegador.get("https://www.detran.mt.gov.br/")
 
 try:
     
+    time.sleep(5)
+
     tela_atendimento = WebDriverWait(navegador, 10).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, "#myPopup > a > picture > img"))
+        EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div[4]/section/div/div/div/div/div[12]/section/div/div[2]/div/div/div/div/div/div/div/div[2]/a/img"))
     )
             
-    botao_fechar = navegador.find_element(By.CSS_SELECTOR, "#myPopup > span")
+    botao_fechar = navegador.find_element(By.XPATH, "/html/body/div[1]/div[4]/section/div/div/div/div/div[12]/section/div/div[2]/div/div/div/div/div/div/div/div[1]/button/span")
     navegador.execute_script("arguments[0].click();", botao_fechar)
 
 except (TimeoutException, NoSuchElementException):  
      pass
+ 
+
  
 tela_cookies = WebDriverWait(navegador, 30).until(
     EC.element_to_be_clickable((By.XPATH, '//*[@id="adopt-accept-all-button"]'))
