@@ -42,6 +42,7 @@ def criar_pasta_saida(pasta_download, caminho_planilha):
 
 # Caminha para selecionar o download como PDF
 def selecionar_download_como_pdf(pasta_saida, placa_atual, ano_ipva):
+    time.sleep(8)
 
     # Navegar pelas opções até "Salvar"
     for _ in range(5):  # Pressiona 'tab' 5 vezes
@@ -165,6 +166,12 @@ try:
 
         if status_atual is None:
 
+            espera_placa = WebDriverWait(navegador, 60).until(
+                EC.visibility_of_element_located((By.XPATH, '(//input[contains(@class, "mat-input-element")])[1]'))
+            )
+
+            time.sleep(2)
+
             campo_placa = navegador.find_element(By.XPATH, '(//input[contains(@class, "mat-input-element")])[1]')
             campo_placa.send_keys(placa_atual)
 
@@ -182,12 +189,29 @@ try:
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "mat-card-content > app-lista-dados"))
             )
 
-            botao_consultar_2 = navegador.find_element(By.XPATH, "/html/body/app-root/div/div[1]/app-layout-servicos/app-debitos/app-card-detran/mat-card/mat-card-content/app-lista-dados/div/div[2]/table/tbody/tr/td[7]/button")
-            botao_consultar_2.click()
+            time.sleep(5)
 
-            tela_licenciamento = WebDriverWait(navegador, 60).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "app-lista-dados:nth-child(2) div.forms-wrapper-header.ng-star-inserted > div > span"))
+            botao_consultar_2 = WebDriverWait(navegador, 60).until(
+                EC.element_to_be_clickable((By.XPATH, "//mat-card//mat-card-content//app-lista-dados//button"))
             )
+            navegador.execute_script("arguments[0].click();", botao_consultar_2)
+
+            try:
+                tela_licenciamento = WebDriverWait(navegador, 60).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "app-lista-dados:nth-child(2) div.forms-wrapper-header.ng-star-inserted > div > span"))
+                )
+
+            except (NoSuchElementException, Exception):
+
+                botao_consultar_2 = WebDriverWait(navegador, 60).until(
+                    EC.element_to_be_clickable((By.XPATH, "//mat-card//mat-card-content//app-lista-dados//button"))
+                )
+                navegador.execute_script("arguments[0].click();", botao_consultar_2)
+
+                tela_licenciamento = WebDriverWait(navegador, 60).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "app-lista-dados:nth-child(2) div.forms-wrapper-header.ng-star-inserted > div > span"))
+                )
+
 
             time.sleep(3)
 
@@ -229,7 +253,7 @@ try:
                 ).click()
 
             guia_dados[f"C{linhaPlan}"] = "OK!"
-            planilha.save(caminho_planilha)
+            
             
 
             #                                           EMISSÃO IPVA
@@ -246,33 +270,62 @@ try:
 
             print(f"{len(child_elements)}")
 
-            for cont in range(1, len(child_elements) + 1):
-                selector_ipva = f"/html/body/div[2]/div[2]/div/div/div/mat-option[{cont}]"
+            numero_linhas = len(child_elements)
 
-                botao_ano_ipva = navegador.find_element(By.XPATH, selector_ipva)
-                botao_ano_ipva.click()
+            if numero_linhas > 1:
 
-                time.sleep(3)
+                for cont in range(1, numero_linhas + 1):
 
-                selector_ano_ipva = navegador.find_element(By.CSS_SELECTOR, "div:nth-child(3) > app-ipva > div > div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child(1) > td.mat-cell.cdk-cell.cdk-column-Ano.mat-column-Ano.ng-star-inserted")
-                texto_ipva = selector_ano_ipva.text 
+                    time.sleep(2)
 
-                if texto_ipva != "2025":
+                    selector_ipva = f"/html/body/div[2]/div[2]/div/div/div/mat-option[{cont}]"
+
+                    botao_ano_ipva = navegador.find_element(By.XPATH, selector_ipva)
+                    botao_ano_ipva.click()
+
+                    time.sleep(3)
+
+                    selector_ano_ipva = navegador.find_element(By.CSS_SELECTOR, "div:nth-child(3) > app-ipva > div > div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child(1) > td.mat-cell.cdk-cell.cdk-column-Ano.mat-column-Ano.ng-star-inserted")
+                    texto_ipva = selector_ano_ipva.text 
+
+                    if texto_ipva != "2025":
+
+                        tabela_emissao_ipva = WebDriverWait(navegador, 60).until(
+                            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > thead > tr"))
+                        )   
+
+                        botao_emitir_ipva = navegador.find_element(By.CSS_SELECTOR, "div:nth-child(3) > app-ipva > div > div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child(7) > td.mat-cell.cdk-cell.cdk-column-A--o.mat-column-A--o.ng-star-inserted")  
+                        botao_emitir_ipva.click()
+
+                        time.sleep(10)
+
+                        botao_ipva_execicio = WebDriverWait(navegador, 60).until(
+                            EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/div/div[1]/app-layout-servicos/app-debitos/app-card-detran/mat-card/mat-card-content/div[2]/app-ipva/div/div[2]/div[1]/p/mat-form-field/div/div[1]/div[3]/mat-select"))
+                        ).click()
+
+                        continue
 
                     tabela_emissao_ipva = WebDriverWait(navegador, 60).until(
                         EC.visibility_of_element_located((By.CSS_SELECTOR, "div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > thead > tr"))
-                    )   
+                    )
 
-                    botao_emitir_ipva = navegador.find_element(By.CSS_SELECTOR, "div:nth-child(3) > app-ipva > div > div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child(7) > td.mat-cell.cdk-cell.cdk-column-A--o.mat-column-A--o.ng-star-inserted")  
+                    botao_emitir_ipva = navegador.find_element(By.CSS_SELECTOR, "div:nth-child(3) > app-ipva > div > div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child(1) > td.mat-cell.cdk-cell.cdk-column-A--o.mat-column-A--o.ng-star-inserted > button")
                     botao_emitir_ipva.click()
 
-                    time.sleep(8)
+                    time.sleep(10)
 
                     botao_ipva_execicio = WebDriverWait(navegador, 60).until(
                         EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/div/div[1]/app-layout-servicos/app-debitos/app-card-detran/mat-card/mat-card-content/div[2]/app-ipva/div/div[2]/div[1]/p/mat-form-field/div/div[1]/div[3]/mat-select"))
                     ).click()
 
-                    continue
+                    guia_dados[f"D{linhaPlan}"] = "OK!"
+                
+            else:
+
+                time.sleep(3)
+
+                botao_ano_ipva = navegador.find_element(By.XPATH, "/html/body/div[2]/div[2]/div/div/div/mat-option[1]")
+                botao_ano_ipva.click()
 
                 tabela_emissao_ipva = WebDriverWait(navegador, 60).until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, "div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > thead > tr"))
@@ -281,17 +334,24 @@ try:
                 botao_emitir_ipva = navegador.find_element(By.CSS_SELECTOR, "div:nth-child(3) > app-ipva > div > div.forms-wrapper-body > div.forms-wrapper-body.forms-wrapper-body_table.pad-botton.ng-star-inserted > table > tbody > tr:nth-child(1) > td.mat-cell.cdk-cell.cdk-column-A--o.mat-column-A--o.ng-star-inserted > button")
                 botao_emitir_ipva.click()
 
-                time.sleep(8)
+                time.sleep(10)
 
                 botao_ipva_execicio = WebDriverWait(navegador, 60).until(
                     EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/div/div[1]/app-layout-servicos/app-debitos/app-card-detran/mat-card/mat-card-content/div[2]/app-ipva/div/div[2]/div[1]/p/mat-form-field/div/div[1]/div[3]/mat-select"))
                 ).click()
-            
-            guia_dados[f"D{linhaPlan}"] = "OK!"
 
+                guia_dados[f"D{linhaPlan}"] = "OK!"
+
+            time.sleep(1.5)
+            pyautogui.leftClick(x=540, y=484)
+            time.sleep(1.5)
+
+        
             botao_voltar_pesquisa = WebDriverWait(navegador, 60).until(
-                EC.element_to_be_clickable((By.XPATH, "/html/body/app-root/div/div[1]/app-layout-servicos/app-debitos/app-card-detran/mat-card/mat-card-footer/mat-card-actions/button"))
-            ).click()
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "#footer > mat-card-actions > button > span.mat-ripple.mat-button-ripple"))
+            )
+            navegador.execute_script("arguments[0].click();", botao_voltar_pesquisa)
+
 
         index +=1
         planilha.save(caminho_planilha)    
@@ -389,8 +449,8 @@ for arquivo in arquivos_pdfs:
 
 for linha in range (2, guia_dados.max_row + 1):
     
-    celula_ipva = guia_dados[f'F{linha}'].value
-    celula_licenciamento = guia_dados[f'G{linha}'].value
+    celula_ipva = guia_dados[f'E{linha}'].value
+    celula_licenciamento = guia_dados[f'F{linha}'].value
     
     # Verifica se algum dos valores é None ou está vazio
     if not celula_ipva or not celula_licenciamento:
